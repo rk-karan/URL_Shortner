@@ -1,1 +1,1 @@
-from .classes import CREATE_URL
+from .classes import CREATE_URL, CREATE_URL_REQUEST

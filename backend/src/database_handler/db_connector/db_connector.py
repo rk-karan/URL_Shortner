@@ -6,7 +6,6 @@ from sqlalchemy.orm import sessionmaker, declarative_base
 from decorators import log_info
 from logger import logger
 
-
 dotEnv_path = os.path.join(os.path.dirname(__file__), '.env')
 load_dotenv(dotEnv_path)
 
@@ -44,7 +43,7 @@ class DB_Connector:
         except Exception as e:
             self.logger.log(f"Error in initialize_database: {e}", error_tag=True)
     
-    @log_info  
+    # @log_info  
     def get_db(self):
         db = self.SessionLocal()
         try:
