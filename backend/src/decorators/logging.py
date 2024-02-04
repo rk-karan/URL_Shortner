@@ -7,6 +7,7 @@ def log_info(func):
     @wraps(func)
     def wrapper(*args, **kwargs):
         logger.log(f"Function {func.__name__} called with keyword arguments: {kwargs} arguments: {args}")
+        # result=None
         try:
             result = func(*args, **kwargs)
             logger.log(f"SUCCESSFUL: Executed Function {func.__name__}")
