@@ -1,4 +1,3 @@
-import uvicorn
 import socket
 from fastapi import FastAPI, Depends, HTTPException, Body, Request, Response
 from fastapi.responses import RedirectResponse
@@ -16,8 +15,10 @@ from database_handler.schemas import NEW_URL_REQUEST
 from database_handler.crud import create_short_url, get_original_url
 
 from decorators import log_info
-
-from routes.user_routes import routes as user_routes
+from utils.send_response import send_response
+from database_handler.models import url_models
+from database_handler.models import user_models
+from database_handler.db_connector import db_connector
 
 app = FastAPI()
 logger.log("FastAPI app initialized")

@@ -1,10 +1,8 @@
-from datetime import timedelta, datetime
-import time
 import jwt
 import os
 from dotenv import load_dotenv
-from passlib.context import CryptContext
 from fastapi import Request, HTTPException
+from datetime import datetime, timedelta
 
 
 from logger import logger
@@ -16,7 +14,6 @@ SECRET_KEY = os.getenv("SECRET_KEY")
 ALGORITHM = os.getenv("ALGORITHM")
 ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES"))
 
-# bcrypt_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 class JWT_Handler:
     def __init__(self):
         try:
@@ -44,7 +41,7 @@ class JWT_Handler:
             if not token:
                 raise Exception("Token is required")
             payload = jwt.decode(token, self.SECRET_KEY, algorithms=[self.ALGORITHM])
-            return payload if payload['expires'] >= time.time() else None
+            return payload if payload['expires'] >= datetime.utcnow() else None
         except jwt.ExpiredSignatureError:
             return HTTPException(status_code = 400 , detail = "Login to access!")
         except Exception as e:
