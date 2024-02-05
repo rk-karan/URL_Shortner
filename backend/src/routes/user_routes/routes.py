@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, Body, Response
+from fastapi import APIRouter, Depends, Body, Response
 from sqlalchemy.orm import Session
 
 from database_handler.db_connector import db_connector
