@@ -52,7 +52,6 @@ class JWT_Handler:
 
     def verify_token(self, request: Request):
         token = request.cookies.get("access_token")
-        print("Here:    ", token )
         if not token or token == "":
             raise HTTPException(status_code=401, detail="Login again!")
         try:
