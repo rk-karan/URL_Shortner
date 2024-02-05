@@ -39,16 +39,5 @@ def home():
 
 app.include_router(user_routes.router)
 
-# @app.post("/create_short_url", response_model = CREATE_URL)
-# # @log_info
-# def create_short_url(create_url_request: CREATE_URL_REQUEST, db: Session = Depends(db_connector.get_db) , endpoint = 'create_short_url'):
-#     try:
-#         url_obj = add_url(db , create_url_request)
-#         return send_response(content=url_obj, status_code=200)
-#     except Exception as e:
-#         logger.log(f"Error creating short url: {e}", error_tag=True)
-#         raise send_response(content={"error": e}, status_code=500, error_tag=True)
-
-
 if __name__ == "__main__":
     uvicorn.run("application:app", host="127.0.0.1", port=8000 , reload = True)

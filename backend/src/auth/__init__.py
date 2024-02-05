@@ -1,1 +1,1 @@
-from .jwt_handler.jwt_handler import JWT_Handler
+from .jwt_handler.jwt_handler import auth_handler
