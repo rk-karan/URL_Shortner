@@ -1,7 +1,8 @@
-from sqlalchemy import Column, Integer, String, ForeignKey
-from ..db_connector import db_connector
+from sqlalchemy import Column, Integer, String
+from ...db_connector import db_connector
 
 Base = db_connector.Base
+
 class URLS_Mapping(Base):
     __tablename__ = 'urls_mapping'
 
