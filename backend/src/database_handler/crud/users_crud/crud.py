@@ -12,11 +12,11 @@ from utils.send_response import send_response
 bcrypt_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 def add_user(db: Session, create_url_request: NEW_USER_REQUEST):
-    
+
     try:
         if check_user(db, create_url_request.email):
             raise Exception("User already exists")
-        
+
         hashed_password = bcrypt_context.hash(create_url_request.password)
         new_entry = USERS(name=create_url_request.name, email=create_url_request.email, hashed_password=hashed_password)
         db.add(new_entry)
