@@ -6,14 +6,12 @@ MAX_LIMIT = 70000
 
 @log_info
 def decimal_to_base62(decimal_num: int):
-    
+
     try:
         if not decimal_num:
             raise Exception("Input is empty")
-        
         if decimal_num > MAX_LIMIT:
             raise Exception("Input is greater than the maximum limit")
-        
         base62_string = ""
         decimal_num = MAX_LIMIT - decimal_num
 
@@ -27,21 +25,19 @@ def decimal_to_base62(decimal_num: int):
         logger.log(f"Error converting decimal to base62: {e}", error_tag=True)
         raise e
 
-@log_info    
+@log_info
 def base62_to_decimal(base62_string: str):
-    
     try:
         if not base62_string:
             raise Exception("Input is empty")
-        
         base62_dict = {char: index for index, char in enumerate(CHARACTERS)}
         decimal_num = 0
         base = 62
-
+        print(base62_dict)
+        print(base62_string)
         for char in base62_string:
             decimal_num = decimal_num * base + base62_dict[char]
-        
-        return decimal_num
+        return MAX_LIMIT - decimal_num
     except Exception as e:
         logger.log(f"Error converting base62 to decimal: {e}", error_tag=True)
         raise e
