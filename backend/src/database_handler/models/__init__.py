@@ -1,2 +1,2 @@
-import url_models.models as url_models
-import user_models.models as user_models
+from .url_models.models import *
+from .user_models.models import *

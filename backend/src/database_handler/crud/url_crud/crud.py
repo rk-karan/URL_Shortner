@@ -7,23 +7,22 @@ from base62conversions.base62conversions import decimal_to_base62 , base62_to_de
 from database_handler.db_connector import db_connector
 from sqlalchemy import MetaData
 
-def create_short_url( db: Session , create_url: NEW_URL_REQUEST, hostname):
-    if 'urls_mapping' in db_connector.Metadata:
-        short_url_count = db.query(func.count(URLS_Mapping.id)).scalar()
-        short_url_id = short_url_count + 1
-        short_url = "http://localhost:8000/" + decimal_to_base62(short_url_id)
-    else:
-        short_url = "http://localhost:8000/" + decimal_to_base62(1)
-    url_obj = URLS_Mapping(long_url=create_url.long_url, short_url=short_url)
-    db.add(url_obj)
-    db.commit()
-    db.refresh(url_obj)
-    return {"short_url": short_url}
+def create_short_url(db: Session , create_url: NEW_URL_REQUEST, email: str):
+    try:
+        url_obj = URLS_Mapping(long_url=create_url.long_url, email=email)
+        db.add(url_obj)
+        db.commit()
+        db.refresh(url_obj)
+    
+        short_url = "http://localhost:8000/" + decimal_to_base62(url_obj.id)
+        return {"short_url": short_url}
+    except Exception as e:
+        Exception(f"Error creating short url:{e}")
 
-def get_original_url(db: Session, short_url):
-    id_ = base62_to_decimal(short_url)
-    print("id: ",id_)
-    item = db.query(URLS_Mapping).filter(URLS_Mapping.id == id_).first()
+def get_original_url(db: Session, short_url: str):
+    _id = base62_to_decimal(short_url)
+    item = db.query(URLS_Mapping).filter(URLS_Mapping.id == _id).first()
+    
     if item is None:
         raise HTTPException(status_code=404, detail="Item not found")
     return item.long_url

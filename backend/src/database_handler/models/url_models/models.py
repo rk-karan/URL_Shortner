@@ -8,4 +8,4 @@ class URLS_Mapping(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     long_url = Column(String, index=True)
-    short_url = Column(String, index=True)
+    email = Column(String, index=True)
