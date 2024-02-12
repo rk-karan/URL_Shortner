@@ -18,7 +18,7 @@ const  Header = () => {
       <AppBar position="static">
         <Toolbar>
           <Typography variant="h6" component="div" sx={{ flexGrow: 1 }} onClick={()=> navigate('/')} className = 'heading'>
-            URL SHORTNER
+            URL SHORTENER
           </Typography>
           <Button color="inherit" onClick={handleClick}>Sign in</Button>
         </Toolbar>
