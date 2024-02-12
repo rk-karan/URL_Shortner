@@ -1,0 +1,15 @@
+.box{
+    margin-top: 2em;
+    padding: 2em;
+    justify-content: center;
+    align-items: center;
+}
+
+.para{
+    &:hover{
+        cursor: pointer;
+    }
+}
+.textfield{
+    margin: 2em;
+}
