@@ -1,6 +1,6 @@
 import uvicorn
 import socket
-from fastapi import FastAPI, Depends, HTTPException, Body, Request, Response
+from fastapi import FastAPI, Depends
 from fastapi.responses import RedirectResponse
 from sqlalchemy.orm import Session
 from typing import Annotated
@@ -13,7 +13,7 @@ from database_handler.db_connector import db_connector
 
 from utils.send_response import send_response
 from database_handler.schemas import NEW_URL_REQUEST
-from database_handler.crud import create_short_url, get_original_url
+from database_handler.crud import get_original_url
 
 from decorators import log_info
 
@@ -39,6 +39,14 @@ def home():
         "hostname": socket.gethostname()
     }
     return send_response(content=response, status_code=200)
+
+@app.get("/{short_url}", tags=["redirection"])
+def redirect_short_url(short_url: str , db: Session = Depends(db_connector.get_db)):
+    try:
+        original_url = get_original_url(db , short_url)
+        return RedirectResponse(url = original_url)
+    except Exception as e:
+        return send_response(content={"error": e}, status_code=500, error_tag=True)
 
 app.include_router(user_routes.router)
 app.include_router(url_routes.router)

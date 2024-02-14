@@ -1,6 +1,7 @@
 from sqlalchemy.orm import Session
 from database_handler.schemas import NEW_USER_REQUEST, USER_LOGIN, TOKEN_RESPONSE, USER
 from database_handler.models import USERS
+from database_handler.models import URLS_Mapping
 from auth import auth_handler
 
 
@@ -42,3 +43,11 @@ def get_all_users(db: Session):
         return users
     except Exception as e:
         raise Exception(f"Error getting all users: {e}")
+    
+def get_urls(db: Session, email: str):
+    try:
+        urls_data = db.query(URLS_Mapping.id, URLS_Mapping.long_url).filter(URLS_Mapping.email == email).all()
+        print(f"Urls data: {urls_data}")
+        return [{"id": id, "long_url": long_url} for id, long_url in urls_data]
+    except Exception as e:
+        raise Exception(f"Error getting urls: {e}")

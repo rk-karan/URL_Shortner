@@ -7,7 +7,8 @@ from database_handler.schemas import NEW_USER_REQUEST, TOKEN_RESPONSE, USER_LOGI
 from utils.send_response import send_response
 from logger import logger
 from decorators import log_info
-from database_handler.crud.users_crud.crud import add_user, login_user, get_all_users
+from database_handler.crud.users_crud.crud import add_user, login_user, get_all_users, get_urls
+from base62conversions import decimal_to_base62
 
 from auth import auth_handler
 
@@ -39,6 +40,19 @@ async def logout(response: Response):
     response.set_cookie(key="access_token", value="")  # Expire the cookie
     return send_response(content={"message": "Logged out successfully"}, status_code=200)
 
-@router.get("/all")
-async def user_login(db: Session = Depends(db_connector.get_db) , endpoint = 'all_users', payload : dict = Depends(auth_handler.verify_token)):
-    return [get_all_users(db), payload]
+@router.get("/me")
+async def get_user_me(db: Session = Depends(db_connector.get_db), token: str = Depends(auth_handler.O2AUTH2_SCHEME), endpoint = 'all_users'):
+    try:
+        user = auth_handler.get_current_user(token)
+        urls = get_urls(db, user.get('email'))
+        
+        for url in urls:
+            print(f"Url: {url}")
+            url.update({'id': decimal_to_base62(int(url.get('id')))})
+        content = {
+            'user': user,
+            'urls': urls
+        }
+        return send_response(content=content, status_code=200)
+    except Exception as e:
+        return send_response(content={"error": e}, status_code=500, error_tag=True)
