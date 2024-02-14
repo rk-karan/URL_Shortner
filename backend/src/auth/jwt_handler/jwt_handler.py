@@ -8,7 +8,6 @@ from passlib.context import CryptContext
 from ..OAuth2.OAuth2PasswordBearerWithCookie import OAuth2PasswordBearerWithCookie
 
 from logger import logger
-from database_handler.schemas import USER_LOGIN, TOKEN_RESPONSE
 
 load_dotenv()
 
@@ -17,6 +16,7 @@ ALGORITHM = os.getenv("ALGORITHM")
 ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES"))
 
 BCRYPT_CONTEXT = CryptContext(schemes=["bcrypt"], deprecated="auto")
+O2AUTH2_SCHEME = OAuth2PasswordBearerWithCookie(tokenUrl="/user/login")
 
 class JWT_Handler:
     def __init__(self):
@@ -28,6 +28,7 @@ class JWT_Handler:
             self.ALGORITHM = ALGORITHM
             self.ACCESS_TOKEN_EXPIRE_MINUTES = ACCESS_TOKEN_EXPIRE_MINUTES
             self.HASHING_CONTEXT = BCRYPT_CONTEXT
+            self.O2AUTH2_SCHEME = O2AUTH2_SCHEME
 
         except Exception as e:
             self.logger.log(f"Error in JWT_Handler Initialization: {e}", error_tag=True)
