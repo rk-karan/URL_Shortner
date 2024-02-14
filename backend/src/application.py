@@ -46,7 +46,7 @@ def redirect_short_url(short_url: str , db: Session = Depends(db_connector.get_d
         original_url = get_original_url(db , short_url)
         return RedirectResponse(url = original_url)
     except Exception as e:
-        return send_response(content={"error": e}, status_code=500, error_tag=True)
+        return send_response(content={"message": e}, status_code=500, error_tag=True)
 
 app.include_router(user_routes.router)
 app.include_router(url_routes.router)

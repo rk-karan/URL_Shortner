@@ -18,6 +18,6 @@ def send_response(content=None, status_code=None, error_tag=False):
         
         return JSONResponse(content = json.dumps(content.dict(), indent=4, sort_keys=True, default=str), status_code=status_code)
     except Exception as e:
-        detail = f"Some error has occurred. Status Code: {status_code} with Response: {content} and Error: {e}"
-        logger.log(detail, error_tag=True)
-        raise HTTPException(status_code=status_code, detail=detail)
+        logger.log(content, error_tag=True)
+        # raise HTTPException(status_code=status_code, detail=json.dumps(content, indent=4, sort_keys=True, default=str))
+        return JSONResponse(content=json.dumps(content, indent=4, sort_keys=True, default=str), status_code=status_code)

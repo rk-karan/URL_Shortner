@@ -43,7 +43,7 @@ def get_original_url(db: Session, short_url: str):
             raise HTTPException(status_code=404, detail="Item not found")
         return item.long_url
     except Exception as e:
-        raise Exception(f"Error getting original url: {e}")
+        raise e
 
 def delete_url(db: Session, long_url: str, email: str):
     try:

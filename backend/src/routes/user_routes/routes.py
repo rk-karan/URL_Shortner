@@ -23,17 +23,22 @@ async def create_user(response: Response, create_user_request: NEW_USER_REQUEST 
         add_user(db , create_user_request)
         return send_response(content={"message": "User created successfully"}, status_code=200)
     except Exception as e:
-        raise send_response(content={"error": e}, status_code=500, error_tag=True)
+        return send_response(content={"message": e}, status_code=500, error_tag=True)
 
 @router.post("/login")
 async def user_login(response: Response, form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(db_connector.get_db) , endpoint = 'login_user'):
     try:
         user_login = USER_LOGIN(email = form_data.username, password = form_data.password)
         access_token = login_user(db , user_login)
-        response.set_cookie(key = "access_token" , value =f"Bearer {access_token}", httponly = True)
+        
+        if access_token:
+            response.set_cookie(key = "access_token" , value =f"Bearer {access_token}", httponly = True)
+        else:
+            raise Exception("Invalid credentials")
+        
         return TOKEN_RESPONSE(access_token=access_token).dict()    
     except Exception as e:
-        return send_response(content=e, status_code=500, error_tag=True)
+        return send_response(content={"message": e}, status_code=500, error_tag=True)
 
 @router.post("/logout")
 async def logout(response: Response):
@@ -55,4 +60,4 @@ async def get_user_me(db: Session = Depends(db_connector.get_db), token: str = D
         }
         return send_response(content=content, status_code=200)
     except Exception as e:
-        return send_response(content={"error": e}, status_code=500, error_tag=True)
+        return send_response(content={"message": e}, status_code=500, error_tag=True)
