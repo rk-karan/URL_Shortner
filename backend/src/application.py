@@ -2,6 +2,7 @@ import uvicorn
 import socket
 from fastapi import FastAPI, Depends, HTTPException, Body, Request, Response
 from fastapi.responses import RedirectResponse
+from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 from typing import Annotated
 import json
@@ -22,6 +23,17 @@ from routes.url_routes import routes as url_routes
 
 app = FastAPI()
 logger.log("FastAPI app initialized")
+
+app = FastAPI()
+
+# Set up CORS
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:3000"],  # Only allow requests from localhost:3000
+    allow_credentials=True,
+    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],  # Allow the specified HTTP methods
+    allow_headers=["*"],  # Allow all headers
+)
 
 try:
     user_models.Base.metadata.create_all(bind=db_connector.engine)
