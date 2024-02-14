@@ -1,37 +1,44 @@
 from sqlalchemy.orm import Session
-
-from database_handler.schemas import NEW_USER_REQUEST, USER_LOGIN
+from database_handler.schemas import NEW_USER_REQUEST, USER_LOGIN, TOKEN_RESPONSE, USER
 from database_handler.models import USERS
-from logger import logger
+from auth import auth_handler
 
-from passlib.context import CryptContext
-from auth import JWT_Handler
 
-bcrypt_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-auth_handler = JWT_Handler()
+def create_pay_load(user: str, email: str):
+    payload = { "user" : USER(name = user, email = email).dict()}
+    return payload
 
-def add_user(db: Session, create_url_request: NEW_USER_REQUEST):
-    
+def login_user(db: Session , user : USER_LOGIN):
     try:
-        if check_user(db, create_url_request.email):
-            raise Exception("User already exists")
+        stored_user = db.query(USERS).filter(USERS.email == user.email).first()
         
-        hashed_password = bcrypt_context.hash(create_url_request.password)
-        new_entry = USERS(name=create_url_request.name, email=create_url_request.email, hashed_password=hashed_password)
-        db.add(new_entry)
-        db.commit()
-        db.refresh(new_entry)
-        
-        user_login = USER_LOGIN(email=new_entry.email, password=hashed_password)
-        return auth_handler.signJWT(user=user_login)
-        
+        if auth_handler.verify_password(user.password, stored_user.hashed_password):
+            return f"{auth_handler.create_access_token(payload = create_pay_load(stored_user.name, stored_user.email))}"
+       
     except Exception as e:
-        logger.log(f"Error adding user: {e}", error_tag=True)
-        raise e
+        raise Exception(f"Error logging user: {e}")
     
 def check_user(db: Session, email: str):
     try:
         return db.query(USERS).filter(USERS.email == email).first()
     except Exception as e:
-        logger.log(f"Error checking user: {e}", error_tag=True)
+        raise Exception(f"Error checking user: {e}")
+
+def add_user(db: Session, create_url_request: NEW_USER_REQUEST):
+    try:
+        if check_user(db, create_url_request.email):
+            raise Exception("User already exists")
+        hashed_password = auth_handler.get_hashed_password(create_url_request.password)
+        new_entry = USERS(name=create_url_request.name, email=create_url_request.email, hashed_password=hashed_password)
+        db.add(new_entry)
+        db.commit()
+        db.refresh(new_entry)
+    except Exception as e:
         raise e
+
+def get_all_users(db: Session):
+    try:
+        users = db.query(USERS).all()
+        return users
+    except Exception as e:
+        raise Exception(f"Error getting all users: {e}")

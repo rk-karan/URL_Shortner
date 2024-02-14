@@ -5,7 +5,7 @@ import locale
 from colorama import Fore, Style
 
 LOG_LEVEL = logging.INFO
-LOG_FORMATTER = "%(asctime)s - %(levelname)s - %(message)s"
+LOG_FORMATTER = "%(asctime)s - %(levelname)s - %(filename)s - %(message)s"
 LOG_FILE_PATH = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "log.log")
 
 class _logger:
