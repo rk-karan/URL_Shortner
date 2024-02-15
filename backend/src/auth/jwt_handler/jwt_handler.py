@@ -6,6 +6,7 @@ from datetime import datetime, timedelta
 from passlib.context import CryptContext
 
 from ..OAuth2.OAuth2PasswordBearerWithCookie import OAuth2PasswordBearerWithCookie
+from exceptions import INVALID_USER_EXCEPTION
 
 from logger import logger
 
@@ -57,20 +58,21 @@ class JWT_Handler:
     def verify_token(self, token: str):
         try:
             if not token or token == "":
-                raise Exception("Invalid token")
+                raise INVALID_USER_EXCEPTION
             
             payload = self.decode_token(token)
-            # print(payload)
-            
             if not payload or not payload.get("expiry") or not payload.get("user") or datetime.utcnow() > datetime.strptime(payload.get("expiry"), "%Y-%m-%d %H:%M:%S.%f"):
-                raise Exception("Invalid token")
+                raise INVALID_USER_EXCEPTION
             
             return payload
-        except Exception :
-            return None
+        except Exception as e:
+            raise e
         
     def get_current_user(self, token: str):
-        payload = self.verify_token(token)
-        return payload.get("user") if payload else None     
+        try:
+            payload = self.verify_token(token)
+            return payload.get("user")
+        except Exception as e:
+            raise e
 
 auth_handler = JWT_Handler()

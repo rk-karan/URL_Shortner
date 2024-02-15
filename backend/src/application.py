@@ -3,12 +3,8 @@ import socket
 from fastapi import FastAPI, Depends
 from fastapi.responses import RedirectResponse
 from sqlalchemy.orm import Session
-from typing import Annotated
-import json
-
 from logger import logger
-import database_handler.models as user_models
-import database_handler.models as url_models
+from database_handler.models import Base
 from database_handler.db_connector import db_connector
 
 from utils.send_response import send_response
@@ -24,8 +20,7 @@ app = FastAPI()
 logger.log("FastAPI app initialized")
 
 try:
-    user_models.Base.metadata.create_all(bind=db_connector.engine)
-    url_models.Base.metadata.create_all(bind=db_connector.engine)
+    Base.metadata.create_all(bind=db_connector.engine)
     logger.log("Database tables initialized")
 except Exception as e:
     logger.log(f"Error initializing database tables: {e}", error_tag=True)

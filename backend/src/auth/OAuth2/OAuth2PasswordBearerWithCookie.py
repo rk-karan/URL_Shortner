@@ -9,6 +9,8 @@ from typing import Dict
 
 from logger import logger
 
+from constants import ACCESS_TOKEN_KEY, AUTHORIZATION_SCHEME
+
 
 class OAuth2PasswordBearerWithCookie(OAuth2):
     def __init__(
@@ -24,15 +26,15 @@ class OAuth2PasswordBearerWithCookie(OAuth2):
         super().__init__(flows=flows, scheme_name=scheme_name, auto_error=auto_error)
 
     async def __call__(self, request: Request) -> Optional[str]:
-        authorization: str = request.cookies.get("access_token")
+        authorization: str = request.cookies.get(ACCESS_TOKEN_KEY)
 
         scheme, param = get_authorization_scheme_param(authorization)
-        if not authorization or scheme.lower() != "bearer":
+        if not authorization or scheme.lower() != AUTHORIZATION_SCHEME.lower():
             if self.auto_error:
                 raise HTTPException(
                     status_code=status.HTTP_401_UNAUTHORIZED,
-                    detail="Not authenticated",
-                    headers={"WWW-Authenticate": "Bearer"},
+                    detail="Invalid user",
+                    headers={"WWW-Authenticate": AUTHORIZATION_SCHEME},
                 )
             else:
                 return None
