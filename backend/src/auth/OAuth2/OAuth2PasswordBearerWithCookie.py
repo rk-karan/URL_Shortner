@@ -1,18 +1,25 @@
-from fastapi.security import OAuth2
-from fastapi.openapi.models import OAuthFlows as OAuthFlowsModel
-from fastapi import Request
-from fastapi.security.utils import get_authorization_scheme_param
-from fastapi import HTTPException
-from fastapi import status
-from typing import Optional
 from typing import Dict
 
 from logger import logger
 
+from fastapi import status
+from typing import Optional
+from fastapi import Request
+from fastapi import HTTPException
+from fastapi.security import OAuth2
+
 from constants import ACCESS_TOKEN_KEY, AUTHORIZATION_SCHEME
+
+from fastapi.openapi.models import OAuthFlows as OAuthFlowsModel
+from fastapi.security.utils import get_authorization_scheme_param
 
 
 class OAuth2PasswordBearerWithCookie(OAuth2):
+    """This class is used to handle OAuth2 Password Bearer with HTTP-Only Cookie.
+
+    Args:
+        OAuth2 (_type_)
+    """
     def __init__(
         self,
         tokenUrl: str,
@@ -38,5 +45,4 @@ class OAuth2PasswordBearerWithCookie(OAuth2):
                 )
             else:
                 return None
-        # print(f"FINAL:{param}")
         return param
