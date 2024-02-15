@@ -1,13 +1,18 @@
 import * as React from 'react';
-// import { useStore } from 'react-redux';
-// import {useState, useEffect} from 'react';
-// import { useNavigate } from 'react-router';
-// import Header from '../components/Header';
+import {useSelector } from 'react-redux';
+import { useEffect } from 'react';
+import { useNavigate } from 'react-router';
 
 const  Body = () => {
+   const user = useSelector((store) => store.user);
+   const navigate = useNavigate();
+   useEffect(()=> {
+      if(!user){
+         navigate('/login');
+      }
+   }, [user]);
    return (
-      <> 
-         {/* <Header></Header> */}
+      <>
          <p>Body</p>
       </>
    )

@@ -18,9 +18,19 @@ router = APIRouter(
     tags=["user"],
 )
 
-@router.post("/create_user")
-async def create_user(response: Response, create_user_request: NEW_USER_REQUEST = Body(default=None), db: Session = Depends(db_connector.get_db) , endpoint = 'create_user'):
-    print(create_user_request)
+def get_user_profile_content(user= None, urls= []):
+    
+    if not user:
+        return
+        
+    for url in urls:
+        url.update({'id': decimal_to_base62(int(url.get('id')))})
+
+    return { 'user': user, 'urls': urls }
+
+
+@router.post("/create_user", status_code=status.HTTP_201_CREATED)
+async def create_user(create_user_request: NEW_USER_REQUEST = Body(default=None), db: Session = Depends(db_connector.get_db) , endpoint = 'create_user'):
     try:
         add_user(db , create_user_request)
         return MESSAGE_RESPONSE(message=SIGNUP_SUCCESS_MESSAGE).dict()
@@ -33,7 +43,7 @@ async def user_login(response: Response, form_data: OAuth2PasswordRequestForm = 
         user_login = USER_LOGIN(email = form_data.username, password = form_data.password)
         access_token = login_user(db , user_login)
         response.set_cookie(key = ACCESS_TOKEN_KEY , value =f"{AUTHORIZATION_SCHEME} {access_token}", httponly = True)
-
+        
         return LOGIN_RESPONSE(access_token=access_token).dict() 
     except Exception as e:
         return send_response(content=e, status_code=status.HTTP_400_BAD_REQUEST, error_tag=True)
@@ -53,6 +63,6 @@ async def get_user_me(db: Session = Depends(db_connector.get_db), token: str = D
         user = auth_handler.get_current_user(token)
         urls = get_urls(db, user.get('email'))
         return send_response(content=get_user_profile_content(user, urls), status_code=status.HTTP_200_OK)
-
+    
     except Exception as e:
         return send_response(content=e, status_code=status.HTTP_404_NOT_FOUND, error_tag=True)

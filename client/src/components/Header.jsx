@@ -26,13 +26,17 @@ const  Header = () => {
             }
           }
         }catch(err){
-          if(user === null){
-            navigate('/login');
-          }
+          console.log("User not logged in");
         }
       }
       helper();
     });
+
+    useEffect(()=> {
+      if(!user){
+        navigate('/login');
+      }
+    }, [user]);
 
     const handleClick = (e) =>{
         e.preventDefault();
