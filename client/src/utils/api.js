@@ -9,3 +9,15 @@ const API = axios.create({
 export const loginUser = (data) => {
     return API.post('/user/login', data);
 };
+
+export const getUser = () => {
+    return API.get('/user/me');
+};
+
+export const createUser = (data) => {
+    return API.post('/user/create_user', {...data});
+};
+
+export const logoutUser = () => {
+    return API.post('/user/logout');
+}

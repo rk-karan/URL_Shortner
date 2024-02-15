@@ -1,8 +1,8 @@
 import React from 'react';
 import { createBrowserRouter, Outlet, RouterProvider} from 'react-router-dom';
-import Header from '../components/Header';
 import Body from './BodyPage';
 import Login from './Login';
+import Header from '../components/Header';
 
 const AppLayout = () => {
     return(
@@ -11,6 +11,9 @@ const AppLayout = () => {
             <Outlet/>
         </div>
     )
+}
+const Books = () =>{
+    return <p>Books</p>
 }
 
 const Router = () => {
@@ -25,6 +28,10 @@ const Router = () => {
                 },{
                     path: "/login",
                     element: <Login></Login>
+                },
+                {
+                    path: "/books",
+                    element: <Books></Books>
                 }
             ]
         }

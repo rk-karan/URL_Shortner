@@ -19,6 +19,7 @@ router = APIRouter(
 
 @router.post("/create_user")
 async def create_user(response: Response, create_user_request: NEW_USER_REQUEST = Body(default=None), db: Session = Depends(db_connector.get_db) , endpoint = 'create_user'):
+    print(create_user_request)
     try:
         add_user(db , create_user_request)
         return send_response(content={"message": "User created successfully"}, status_code=200)

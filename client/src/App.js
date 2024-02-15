@@ -1,9 +1,12 @@
 import Router from "./pages/RouterPage";
-function App() {
+import appStore from "./redux/appStore";
+import { Provider } from 'react-redux';
+
+const App = ()=> {
   return (
-    <>
+    <Provider store = {appStore}>
       <Router/>
-    </>
-  );
+    </Provider>
+  )
 }
 export default App;
