@@ -3,6 +3,8 @@ from logger import logger
 from dotenv import load_dotenv
 from decorators import log_info
 
+from exceptions.exceptions import INVALID_BASE62_STRING
+
 load_dotenv()
 
 CHARACTERS = os.getenv("CHARACTERS")
@@ -20,9 +22,9 @@ def decimal_to_base62(decimal_num: int):
     """
     try:
         if not decimal_num:
-            raise Exception("Input is empty")
+            raise INVALID_BASE62_STRING
         if decimal_num > MAX_LIMIT:
-            raise Exception("Input is greater than the maximum limit")
+            raise INVALID_BASE62_STRING
         base62_string = ""
         decimal_num = MAX_LIMIT - decimal_num
 
@@ -47,7 +49,7 @@ def base62_to_decimal(base62_string: str):
     """
     try:
         if not base62_string:
-            raise Exception("Input is empty")
+            raise INVALID_BASE62_STRING
         base62_dict = {char: index for index, char in enumerate(CHARACTERS)}
         decimal_num = 0
         base = 62
@@ -55,6 +57,15 @@ def base62_to_decimal(base62_string: str):
         print(base62_string)
         for char in base62_string:
             decimal_num = decimal_num * base + base62_dict[char]
+            
+        result = MAX_LIMIT - decimal_num
+        
+        if result:
+            raise INVALID_BASE62_STRING
+        
+        if result <=0:
+            raise INVALID_BASE62_STRING
+        
         return MAX_LIMIT - decimal_num
     except Exception as e:
         raise e

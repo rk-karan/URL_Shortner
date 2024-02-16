@@ -17,5 +17,8 @@ class LOGIN_RESPONSE(BaseModel):
     type : str = Field(default = "Bearer", title = "Type of the token", description = "The type of the token should be a string")
     message : str = Field(default = LOGIN_SUCCESS_MESSAGE, title = "Message of the response", description = "The message of the response should be a string")
     
+class USER_PASSWORD_CHANGE(BaseModel):
+    new_password : str = Field(default = None, title = "New password of the user", description = "The new password of the user should be a string")
+    
 class MESSAGE_RESPONSE(BaseModel):
     message : str = Field(default = "SUCCESSFUL", title = "Message of the response", description = "The message of the response should be a string")

@@ -2,15 +2,19 @@
 INVALID_USER_MESSAGE = "Invalid user"
 USER_EXISTS_MESSAGE = "User already exists"
 ITEM_NOT_FOUND_MESSAGE = "Item not found"
+INVALID_BASE62_STRING = "Invalid base62 string"
 
 # User crud constants and messages
 SIGNUP_SUCCESS_MESSAGE = "User signed up successfully"
 LOGIN_SUCCESS_MESSAGE = "User logged in successfully"
 LOGOUT_SUCCESS_MESSAGE = "User logged out successfully"
+DELETE_USER_SUCCESS_MESSAGE = "User deleted successfully"
+CHANGE_PASSWORD_SUCCESS_MESSAGE = "Password changed successfully"
 
 # URL crud constants and messages
 CREATE_URL_SUCCESS_MESSAGE = "URL created successfully"
 DELETE_URL_SUCCESS_MESSAGE = "URL deleted successfully"
+EDIT_URL_SUCCESS_MESSAGE = "URL edited successfully"
 
 # Authorization constants
 ACCESS_TOKEN_KEY = "access_token"

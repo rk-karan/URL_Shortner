@@ -7,7 +7,7 @@ from dotenv import load_dotenv
 from datetime import datetime, timedelta
 
 from passlib.context import CryptContext
-from exceptions import INVALID_USER_EXCEPTION
+from exceptions.exceptions import INVALID_USER_EXCEPTION
 from constants import PAYLOAD_USER_KEY, PAYLOAD_EXPIRY_KEY, DATE_TIME_FORMAT
 from ..OAuth2.OAuth2PasswordBearerWithCookie import OAuth2PasswordBearerWithCookie
 

@@ -1,7 +1,5 @@
 from typing import Dict
 
-from logger import logger
-
 from fastapi import status
 from typing import Optional
 from fastapi import Request
