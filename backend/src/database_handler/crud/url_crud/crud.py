@@ -1,6 +1,6 @@
 from sqlalchemy.orm import Session
 
-from exceptions import NOT_FOUND_EXCEPTION
+from exceptions.exceptions import NOT_FOUND_EXCEPTION
 from constants import DOMAIN_NAME, NULL_TEXT
 from database_handler.models import URLS_Mapping
 from database_handler.schemas import NEW_URL_REQUEST
@@ -75,19 +75,29 @@ def delete_url(db: Session, long_url: str, email: str):
         NOT_FOUND_EXCEPTION: _description_
     """
     try:
-        email_to_update = NULL_TEXT
-        long_url_to_update = NULL_TEXT
-        
         existing_url = db.query(URLS_Mapping).filter_by(email=email, long_url=long_url).first()
         
         if existing_url:
-            existing_url.long_url = long_url_to_update
-            existing_url.email = email_to_update
+            existing_url.long_url = NULL_TEXT
+            existing_url.email = NULL_TEXT
             
             db.commit()
             return
             
         raise NOT_FOUND_EXCEPTION
     
+    except Exception as e:
+        raise e
+    
+def edit_long_url(db: Session, old_long_url: str, new_long_url: str, email: str):
+    try:
+        existing_url = db.query(URLS_Mapping).filter_by(email=email, long_url=old_long_url).first()
+        
+        if existing_url:
+            existing_url.long_url = new_long_url
+            db.commit()
+            return
+        
+        raise NOT_FOUND_EXCEPTION
     except Exception as e:
         raise e

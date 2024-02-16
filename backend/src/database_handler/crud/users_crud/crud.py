@@ -2,11 +2,13 @@ from auth import auth_handler
 
 from sqlalchemy.orm import Session
 
-from constants import USER_EXISTS_MESSAGE
+from constants import NULL_TEXT
 from database_handler.models import USERS
-from exceptions import INVALID_USER_EXCEPTION
+from exceptions.exceptions import INVALID_USER_EXCEPTION
 from database_handler.models import URLS_Mapping
 from database_handler.schemas import NEW_USER_REQUEST, USER_LOGIN, USER
+
+from exceptions.exceptions import USER_ALREADY_EXISTS_EXCEPTION
 
 def create_pay_load(user: str, email: str):
     """Creates the payload for a given name and email.
@@ -75,7 +77,7 @@ def add_user(db: Session, create_user_request: NEW_USER_REQUEST):
     """
     try:
         if check_user(db, create_user_request.email):
-            raise Exception(USER_EXISTS_MESSAGE)
+            raise USER_ALREADY_EXISTS_EXCEPTION
         
         hashed_password = auth_handler.get_hashed_password(create_user_request.password)
         new_entry = USERS(name=create_user_request.name, email=create_user_request.email, hashed_password=hashed_password)
@@ -111,5 +113,40 @@ def get_urls(db: Session, email: str):
     try:
         urls_data = db.query(URLS_Mapping.id, URLS_Mapping.long_url).filter(URLS_Mapping.email == email).all()
         return [{"id": id, "long_url": long_url} for id, long_url in urls_data]
+    except Exception as e:
+        raise e
+
+def change_user_password(db: Session, email: str, new_password: str):
+    try:
+        if not check_user(db, email):
+            raise INVALID_USER_EXCEPTION
+
+        hashed_password = auth_handler.get_hashed_password(new_password)
+        db.query(USERS).filter(USERS.email == email).update({"hashed_password": hashed_password})
+        db.commit()
+        return
+    except Exception as e:
+        raise e
+
+def delete_user(db: Session, email: str):
+    """Deletes the user with given email from the db.
+
+    Args:
+        db (Session): DB Session
+        email (str): Email of the user
+
+    Raises:
+        INVALID_USER_EXCEPTION
+    """
+    try:
+        if not check_user(db, email):
+            raise INVALID_USER_EXCEPTION
+
+        db.query(URLS_Mapping).filter(URLS_Mapping.email == email).update({"email": NULL_TEXT, "long_url": NULL_TEXT})
+        db.commit()
+        
+        db.query(USERS).filter(USERS.email == email).delete()
+        db.commit()
+        return
     except Exception as e:
         raise e
