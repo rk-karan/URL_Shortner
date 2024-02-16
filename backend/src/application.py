@@ -20,7 +20,7 @@ app = FastAPI()
 logger.log("FastAPI app initialized")
 
 try:
-    Base.metadata.create_all(bind=db_connector.engine)
+    Base.metadata.create_all(bind=db_connector._engine)
     logger.log("Database tables initialized")
 except Exception as e:
     logger.log(f"Error initializing database tables: {e}", error_tag=True)
