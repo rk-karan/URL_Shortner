@@ -4,12 +4,8 @@ from fastapi import FastAPI, Depends
 from fastapi.responses import RedirectResponse
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
-from typing import Annotated
-import json
-
 from logger import logger
-import database_handler.models as user_models
-import database_handler.models as url_models
+from database_handler.models import Base
 from database_handler.db_connector import db_connector
 
 from utils.send_response import send_response
@@ -36,8 +32,7 @@ app.add_middleware(
 )
 
 try:
-    user_models.Base.metadata.create_all(bind=db_connector.engine)
-    url_models.Base.metadata.create_all(bind=db_connector.engine)
+    Base.metadata.create_all(bind=db_connector.engine)
     logger.log("Database tables initialized")
 except Exception as e:
     logger.log(f"Error initializing database tables: {e}", error_tag=True)
@@ -58,7 +53,7 @@ def redirect_short_url(short_url: str , db: Session = Depends(db_connector.get_d
         original_url = get_original_url(db , short_url)
         return RedirectResponse(url = original_url)
     except Exception as e:
-        return send_response(content={"error": e}, status_code=500, error_tag=True)
+        return send_response(content={"message": e}, status_code=500, error_tag=True)
 
 app.include_router(user_routes.router)
 app.include_router(url_routes.router)
