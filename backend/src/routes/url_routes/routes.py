@@ -11,8 +11,8 @@ from database_handler.schemas import NEW_URL_REQUEST
 from fastapi import APIRouter, Depends, Body, status
 
 from database_handler.db_connector import db_connector
-from database_handler.crud import create_short_url, delete_url
-from database_handler.schemas import MESSAGE_RESPONSE, SHORT_URL_RESPONSE
+from database_handler.crud import create_short_url, delete_url, edit_long_url
+from database_handler.schemas import MESSAGE_RESPONSE, SHORT_URL_RESPONSE, EDIT_LONG_URL, EDIT_LONG_URL_RESPONSE
 
 
 
@@ -40,6 +40,17 @@ async def add_url(new_url: NEW_URL_REQUEST  = Body(default=None) ,  db: Session 
         return SHORT_URL_RESPONSE(short_url=short_url, long_url=new_url.long_url).dict()
     except Exception as e:
         return send_response(content=e, status_code=status.HTTP_400_BAD_REQUEST, error_tag=True)
+    
+@router.put("/edit_url", status_code=status.HTTP_200_OK)
+async def edit_url(url_to_change: EDIT_LONG_URL, db: Session = Depends(db_connector.get_db), token: str = Depends(auth_handler._O2AUTH2_SCHEME)):
+    try:
+        user = auth_handler.get_current_user(token)
+        edit_long_url(db, new_long_url=url_to_change.new_long_url, old_long_url=url_to_change.old_long_url, email=user.get(USER_EMAIL_KEY))
+        
+        return EDIT_LONG_URL_RESPONSE(new_long_url=url_to_change.new_long_url, old_long_url=url_to_change.old_long_url).dict()
+    except Exception as e:
+        return send_response(content=e, status_code=status.HTTP_400_BAD_REQUEST, error_tag=True)
+        
 
 @router.put("/delete_url", status_code=status.HTTP_200_OK)
 async def delete_long_url(url_to_delete: NEW_URL_REQUEST = Body(default=None), db: Session = Depends(db_connector.get_db), token: str = Depends(auth_handler._O2AUTH2_SCHEME)):
@@ -49,9 +60,6 @@ async def delete_long_url(url_to_delete: NEW_URL_REQUEST = Body(default=None), d
         url_to_delete (NEW_URL_REQUEST, optional): NEW_URL_REQUEST class. Defaults to Body(default=None).
         db (Session, optional): DB Session. Defaults to Depends(db_connector.get_db).
         token (str, optional): JST Token. Defaults to Depends(auth_handler._O2AUTH2_SCHEME).
-
-    Returns:
-        _type_: _description_
     """
     try:
         user = auth_handler.get_current_user(token)
