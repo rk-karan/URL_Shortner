@@ -1,12 +1,23 @@
 from sqlalchemy.orm import Session
-from database_handler.schemas import NEW_URL_REQUEST
-from database_handler.models import URLS_Mapping
-from base62conversions.base62conversions import decimal_to_base62 , base62_to_decimal
 
 from exceptions import NOT_FOUND_EXCEPTION
 from constants import DOMAIN_NAME, NULL_TEXT
+from database_handler.models import URLS_Mapping
+from database_handler.schemas import NEW_URL_REQUEST
+from base62conversions.base62conversions import decimal_to_base62 , base62_to_decimal
+
 
 def create_short_url(db: Session , create_url: NEW_URL_REQUEST, email: str):
+    """This function is used to create a new short URL and store the information in the db.
+
+    Args:
+        db (Session): DB Session
+        create_url (NEW_URL_REQUEST): New URL request
+        email (str): Email of the user
+
+    Returns:
+        str: Shortened URL
+    """
     try:
         existing_url = db.query(URLS_Mapping).filter_by(email=NULL_TEXT, long_url=NULL_TEXT).first()
         short_url = None
@@ -34,6 +45,15 @@ def create_short_url(db: Session , create_url: NEW_URL_REQUEST, email: str):
         raise e
 
 def get_original_url(db: Session, short_url: str):
+    """This function is used to get the original URL from the short URL.
+
+    Args:
+        db (Session): DB Session
+        short_url (str): Short URL Parameter. (Base62 Encoded ID)
+
+    Returns:
+        str: Original URL
+    """
     try:
         _id = base62_to_decimal(short_url)
         item = db.query(URLS_Mapping).filter(URLS_Mapping.id == _id).first()
@@ -44,6 +64,16 @@ def get_original_url(db: Session, short_url: str):
         raise e
 
 def delete_url(db: Session, long_url: str, email: str):
+    """This function is used to delete the URL from the database.
+
+    Args:
+        db (Session): DB Session
+        long_url (str): Long URL to be deleted
+        email (str): Email of the user
+
+    Raises:
+        NOT_FOUND_EXCEPTION: _description_
+    """
     try:
         email_to_update = NULL_TEXT
         long_url_to_update = NULL_TEXT

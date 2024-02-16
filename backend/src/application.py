@@ -2,6 +2,7 @@ import uvicorn
 import socket
 from fastapi import FastAPI, Depends
 from fastapi.responses import RedirectResponse
+from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 from logger import logger
 from database_handler.models import Base
@@ -20,6 +21,9 @@ from fastapi.middleware.cors import CORSMiddleware
 app = FastAPI()
 logger.log("FastAPI app initialized")
 
+app = FastAPI()
+
+# Set up CORS
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["http://localhost:3000"],  # Only allow requests from localhost:3000
