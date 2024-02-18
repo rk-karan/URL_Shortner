@@ -25,6 +25,12 @@ class USER_LOGIN_RESPONSE(BaseModel):
 class USER_PASSWORD_UPDATE_REQUEST(BaseModel):
     old_password : str = Field(default = None, title = "Old password of the user", description = "The old password of the user should be a string")
     new_password : str = Field(default = None, title = "New password of the user", description = "The new password of the user should be a string")
+
+class USER_PROFILE_RESPONSE(BaseModel):
+    user: USER = Field(default = None, title = "User details", description = "The user details should be a dictionary")
+    urls: list = Field(default = [], title = "Urls of the user", description = "The urls of the user should be a list of dictionaries")
+    urls_count: int = Field(default = 0, title = "Count of the urls", description = "The count of the urls should be an integer")
+    current_access_token: str = Field(default = None, title = "Current access token", description = "The current access token should be a string") 
     
 class MESSAGE_RESPONSE(BaseModel):
     message : str = Field(default = "SUCCESSFUL", title = "Message of the response", description = "The message of the response should be a string")

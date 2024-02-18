@@ -7,8 +7,8 @@ from auth import auth_handler
 from utils import send_response
 from database_handler.db_connector import db_connector
 from database_handler.crud.users_crud.crud import add_user, login_user, get_user_profile_content, delete_user_by_email, change_user_password
-from database_handler.schemas import USER_CREATE_REQUEST, USER_LOGIN_REQUEST, USER_LOGIN_RESPONSE, USER_PASSWORD_UPDATE_REQUEST, MESSAGE_RESPONSE, USER_CREATE_RESPONSE
-from constants import LOGOUT_SUCCESS_MESSAGE, ACCESS_TOKEN_KEY, AUTHORIZATION_SCHEME, DELETE_USER_SUCCESS_MESSAGE, USER_EMAIL_KEY, CHANGE_PASSWORD_SUCCESS_MESSAGE
+from database_handler.schemas import USER_CREATE_REQUEST, USER_LOGIN_REQUEST, USER_LOGIN_RESPONSE, USER_PASSWORD_UPDATE_REQUEST, MESSAGE_RESPONSE, USER_CREATE_RESPONSE, USER_PROFILE_RESPONSE
+from constants import LOGOUT_SUCCESS_MESSAGE, ACCESS_TOKEN_KEY, AUTHORIZATION_SCHEME, DELETE_USER_SUCCESS_MESSAGE, USER_EMAIL_KEY, CHANGE_PASSWORD_SUCCESS_MESSAGE, PAYLOAD_USER_KEY, URLS_KEY
 
 router = APIRouter(
     prefix="/user",
@@ -69,7 +69,7 @@ async def get_user_me(db: Session = Depends(db_connector.get_db), token: str = D
         content = get_user_profile_content(db, user)
         logger.log(f"SUCCESSFUL: Content: {content}, urls retrieved", error_tag=False)
         
-        return send_response(content=content, status_code=status.HTTP_200_OK)
+        return USER_PROFILE_RESPONSE(user=content.get(PAYLOAD_USER_KEY), urls=content.get(URLS_KEY), urls_count=len(content.get(URLS_KEY)), current_access_token=token).dict()
     except Exception as e:
         return send_response(content=e, status_code=status.HTTP_404_NOT_FOUND, error_tag=True)
 
