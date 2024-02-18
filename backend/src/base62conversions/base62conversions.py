@@ -1,16 +1,14 @@
 import os
-from logger import logger
 from dotenv import load_dotenv
-from decorators import log_info
-
 from exceptions.exceptions import INVALID_BASE62_STRING
 
-load_dotenv()
+# Load Environment Variables
+env_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'config', '.env')
+load_dotenv(dotenv_path=env_path)
 
 CHARACTERS = os.getenv("CHARACTERS")
 MAX_LIMIT = int(os.getenv("MAX_LIMIT"))
 
-@log_info
 def decimal_to_base62(decimal_num: int):
     """This function is used to convert decimal number to base62 integer.
 
@@ -37,7 +35,6 @@ def decimal_to_base62(decimal_num: int):
     except Exception as e:
         raise e
 
-@log_info
 def base62_to_decimal(base62_string: str):
     """This function is used to convert base62 integer to decimal number.
 
@@ -57,13 +54,8 @@ def base62_to_decimal(base62_string: str):
         print(base62_string)
         for char in base62_string:
             decimal_num = decimal_num * base + base62_dict[char]
-            
-        result = MAX_LIMIT - decimal_num
         
-        if result:
-            raise INVALID_BASE62_STRING
-        
-        if result <=0:
+        if decimal_num > MAX_LIMIT:
             raise INVALID_BASE62_STRING
         
         return MAX_LIMIT - decimal_num
