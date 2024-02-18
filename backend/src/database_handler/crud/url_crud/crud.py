@@ -1,36 +1,46 @@
+"""This module handles the CRUD operations for the URLS_Mapping table.
+"""
 from sqlalchemy.orm import Session
 
-from exceptions.exceptions import NOT_FOUND_EXCEPTION
-from constants import DOMAIN_NAME, NULL_TEXT
 from database_handler.models import URLS_Mapping
-from database_handler.schemas import NEW_URL_REQUEST
+from exceptions.exceptions import NOT_FOUND_EXCEPTION, MISSING_PARAMS_EXCEPTION
 from base62conversions.base62conversions import decimal_to_base62 , base62_to_decimal
+from constants import DOMAIN_NAME, NULL_ENTRY_IN_URLS_MAPPING, USER_EMAIL_KEY, LONG_URL_KEY
 
+def get_short_url(domain_name: str = DOMAIN_NAME, _id: int = None):
+    
+    if not _id:
+        raise MISSING_PARAMS_EXCEPTION
+    
+    return f"{domain_name}/{_id}"
 
-def create_short_url(db: Session , create_url: NEW_URL_REQUEST, email: str):
+def create_short_url(db: Session , long_url: str, email: str):
     """This function is used to create a new short URL and store the information in the db.
 
     Args:
         db (Session): DB Session
-        create_url (NEW_URL_REQUEST): New URL request
+        long_url (str): New URL request
         email (str): Email of the user
 
     Returns:
         str: Shortened URL
     """
     try:
-        existing_url = db.query(URLS_Mapping).filter_by(email=NULL_TEXT, long_url=NULL_TEXT).first()
+        if long_url is None or email is None:
+            raise MISSING_PARAMS_EXCEPTION
+        
+        existing_url = db.query(URLS_Mapping).filter_by(email=NULL_ENTRY_IN_URLS_MAPPING.get(USER_EMAIL_KEY), long_url=NULL_ENTRY_IN_URLS_MAPPING.get(LONG_URL_KEY)).first()
         short_url = None
         _id =  None
         
         if existing_url:
             
             existing_url.email = email
-            existing_url.long_url = create_url.long_url
+            existing_url.long_url = long_url
             db.commit()
             _id = decimal_to_base62(existing_url.id)
         else:
-            url_obj = URLS_Mapping(long_url=create_url.long_url, email=email)
+            url_obj = URLS_Mapping(long_url=long_url, email=email)
             db.add(url_obj)
             db.commit()
             db.refresh(url_obj)
@@ -39,7 +49,7 @@ def create_short_url(db: Session , create_url: NEW_URL_REQUEST, email: str):
         if not _id:
             raise Exception
     
-        short_url = f"{DOMAIN_NAME}/{_id}"
+        short_url = get_short_url(_id=_id)
         return short_url
     except Exception as e:
         raise e
@@ -55,6 +65,9 @@ def get_original_url(db: Session, short_url: str):
         str: Original URL
     """
     try:
+        if not short_url:
+            raise MISSING_PARAMS_EXCEPTION
+        
         _id = base62_to_decimal(short_url)
         item = db.query(URLS_Mapping).filter(URLS_Mapping.id == _id).first()
         if item is None:
@@ -63,7 +76,7 @@ def get_original_url(db: Session, short_url: str):
     except Exception as e:
         raise e
 
-def delete_url(db: Session, long_url: str, email: str):
+def delete_url(db: Session, entry_id: int, email: str, long_url: str):
     """This function is used to delete the URL from the database.
 
     Args:
@@ -75,11 +88,14 @@ def delete_url(db: Session, long_url: str, email: str):
         NOT_FOUND_EXCEPTION: _description_
     """
     try:
-        existing_url = db.query(URLS_Mapping).filter_by(email=email, long_url=long_url).first()
+        if not entry_id or not email:
+            raise MISSING_PARAMS_EXCEPTION
         
-        if existing_url:
-            existing_url.long_url = NULL_TEXT
-            existing_url.email = NULL_TEXT
+        existing_url = db.query(URLS_Mapping).filter_by(id=entry_id).first()
+        
+        if existing_url and existing_url.email == email and existing_url.long_url == long_url:
+            existing_url.long_url = NULL_ENTRY_IN_URLS_MAPPING.get(LONG_URL_KEY)
+            existing_url.email = NULL_ENTRY_IN_URLS_MAPPING.get(USER_EMAIL_KEY)
             
             db.commit()
             return
@@ -89,11 +105,25 @@ def delete_url(db: Session, long_url: str, email: str):
     except Exception as e:
         raise e
     
-def edit_long_url(db: Session, old_long_url: str, new_long_url: str, email: str):
+def edit_long_url(db: Session, entry_id: int, new_long_url: str, email: str, old_long_url: str):
+    """This function is used to edit the long URL in the database.
+
+    Args:
+        db (Session): DB Session
+        old_long_url (str): Previous Long URL
+        new_long_url (str): New Long URL
+        email (str): Email of the user
+
+    Raises:
+        NOT_FOUND_EXCEPTION
+    """
     try:
-        existing_url = db.query(URLS_Mapping).filter_by(email=email, long_url=old_long_url).first()
+        if not entry_id or not new_long_url or not email:
+            raise MISSING_PARAMS_EXCEPTION
         
-        if existing_url:
+        existing_url = db.query(URLS_Mapping).filter_by(id=entry_id).first()
+        
+        if existing_url and existing_url.email == email and existing_url.long_url == old_long_url:
             existing_url.long_url = new_long_url
             db.commit()
             return

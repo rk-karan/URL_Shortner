@@ -1,7 +1,9 @@
-import logging
-import sys
+""" This module is used to log the messages to the console and to the log file.
+"""
 import os
+import sys
 import locale
+import logging
 from colorama import Fore, Style
 
 LOG_LEVEL = logging.INFO
