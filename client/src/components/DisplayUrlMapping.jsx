@@ -12,8 +12,13 @@ const DisplayUrlMapping = () => {
     const handleClickShortUrl = async(e, id) => {
         e.preventDefault();
         console.log(id);
-        const res = await redirectURL(id);
-        console.log(res);
+        try{
+            const res = await redirectURL(id);
+            console.log(res);
+        }
+        catch(err){
+            console.log(err);
+        }
     }
   return (
     <div>
