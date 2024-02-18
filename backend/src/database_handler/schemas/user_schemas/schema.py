@@ -26,6 +26,10 @@ class USER_PASSWORD_UPDATE_REQUEST(BaseModel):
     old_password : str = Field(default = None, title = "Old password of the user", description = "The old password of the user should be a string")
     new_password : str = Field(default = None, title = "New password of the user", description = "The new password of the user should be a string")
 
+class PAYLOAD(BaseModel):
+    user: USER = Field(default = None, title = "User details", description = "The user details should be a dictionary")
+    expiry: str = Field(default = None, title = "Expiry of the token", description = "The expiry of the token should be a string")
+
 class USER_PROFILE_RESPONSE(BaseModel):
     user: USER = Field(default = None, title = "User details", description = "The user details should be a dictionary")
     urls: list = Field(default = [], title = "Urls of the user", description = "The urls of the user should be a list of dictionaries")

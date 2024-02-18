@@ -1,8 +1,12 @@
-import uvicorn
+import os
 import socket
+import uvicorn
+from typing import Union
+from dotenv import load_dotenv
 from sqlalchemy.orm import Session
 from fastapi import FastAPI, Depends
 from fastapi.responses import RedirectResponse
+from fastapi.middleware.cors import CORSMiddleware
 
 from logger import logger
 from utils import send_response
@@ -16,15 +20,23 @@ from exceptions.exceptions import Invalid_Redirection_Request
 app = FastAPI()
 logger.log("FastAPI app initialized")
 
+# Load Environment Variables
+env_path = os.path.join(os.path.dirname(__file__), 'config', '.env')
+load_dotenv(dotenv_path=env_path)
+
+ORIGINS = os.getenv("ORIGINS")
+
+app.add_middleware(CORSMiddleware, allow_origins=ORIGINS, allow_credentials=True, allow_methods=["*"], allow_headers=["*"])
+
 try:
     Base.metadata.create_all(bind=db_connector._engine)
     logger.log("Database tables initialized")
 except Exception as e:
     logger.log(f"Error initializing database tables: {e}", error_tag=True)
 
-
+# Routes
 @app.get("/", tags=["test"])
-def home():
+def home() -> Union[dict, str]:
     response = {
         "message": "Welcome to the URL Shortener API!",
         "hostname": socket.gethostname()

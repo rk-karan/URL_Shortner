@@ -9,7 +9,7 @@ from passlib.context import CryptContext
 
 from logger import logger
 from constants import PAYLOAD_USER_KEY, PAYLOAD_EXPIRY_KEY, DATE_TIME_FORMAT
-from exceptions.exceptions import INVALID_USER_EXCEPTION, MISSING_PARAMS_EXCEPTION
+from exceptions.exceptions import Invalid_User, Missing_Params
 from ..OAuth2.OAuth2PasswordBearerWithCookie import OAuth2PasswordBearerWithCookie
 
 # Load Environment Variables
@@ -39,7 +39,7 @@ class JWT_Handler:
             self._logger = logger
             
             if not SECRET_KEY or not ALGORITHM or not ACCESS_TOKEN_EXPIRE_MINUTES or not BCRYPT_CONTEXT:
-                raise MISSING_PARAMS_EXCEPTION
+                raise Missing_Params
             
             self._SECRET_KEY = SECRET_KEY
             self._ALGORITHM = ALGORITHM
@@ -117,11 +117,11 @@ class JWT_Handler:
         """
         try:
             if not token or token == "":
-                raise INVALID_USER_EXCEPTION
+                raise Invalid_User
             
             payload = self.decode_token(token)
             if not payload or not payload.get(PAYLOAD_EXPIRY_KEY) or not payload.get(PAYLOAD_USER_KEY) or datetime.utcnow() > datetime.strptime(payload.get(PAYLOAD_EXPIRY_KEY), DATE_TIME_FORMAT):
-                raise INVALID_USER_EXCEPTION
+                raise Invalid_User
             
             return payload
         except Exception as e:

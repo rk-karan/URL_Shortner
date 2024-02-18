@@ -3,14 +3,14 @@
 from sqlalchemy.orm import Session
 
 from database_handler.models import URLS_Mapping
-from exceptions.exceptions import NOT_FOUND_EXCEPTION, MISSING_PARAMS_EXCEPTION
+from exceptions.exceptions import Not_Found, Missing_Params
 from base62conversions.base62conversions import decimal_to_base62 , base62_to_decimal
 from constants import DOMAIN_NAME, NULL_ENTRY_IN_URLS_MAPPING, USER_EMAIL_KEY, LONG_URL_KEY
 
 def get_short_url(domain_name: str = DOMAIN_NAME, _id: int = None):
     
     if not _id:
-        raise MISSING_PARAMS_EXCEPTION
+        raise Missing_Params
     
     return f"{domain_name}/{_id}"
 
@@ -27,7 +27,7 @@ def create_short_url(db: Session , long_url: str, email: str):
     """
     try:
         if long_url is None or email is None:
-            raise MISSING_PARAMS_EXCEPTION
+            raise Missing_Params
         
         existing_url = db.query(URLS_Mapping).filter_by(email=NULL_ENTRY_IN_URLS_MAPPING.get(USER_EMAIL_KEY), long_url=NULL_ENTRY_IN_URLS_MAPPING.get(LONG_URL_KEY)).first()
         short_url = None
@@ -66,12 +66,12 @@ def get_original_url(db: Session, short_url: str):
     """
     try:
         if not short_url:
-            raise MISSING_PARAMS_EXCEPTION
+            raise Missing_Params
         
         _id = base62_to_decimal(short_url)
         item = db.query(URLS_Mapping).filter(URLS_Mapping.id == _id).first()
         if item is None:
-            raise NOT_FOUND_EXCEPTION
+            raise Not_Found
         return item.long_url
     except Exception as e:
         raise e
@@ -89,7 +89,7 @@ def delete_url(db: Session, entry_id: int, email: str, long_url: str):
     """
     try:
         if not entry_id or not email:
-            raise MISSING_PARAMS_EXCEPTION
+            raise Missing_Params
         
         existing_url = db.query(URLS_Mapping).filter_by(id=entry_id).first()
         
@@ -100,7 +100,7 @@ def delete_url(db: Session, entry_id: int, email: str, long_url: str):
             db.commit()
             return
             
-        raise NOT_FOUND_EXCEPTION
+        raise Not_Found
     
     except Exception as e:
         raise e
@@ -119,7 +119,7 @@ def edit_long_url(db: Session, entry_id: int, new_long_url: str, email: str, old
     """
     try:
         if not entry_id or not new_long_url or not email:
-            raise MISSING_PARAMS_EXCEPTION
+            raise Missing_Params
         
         existing_url = db.query(URLS_Mapping).filter_by(id=entry_id).first()
         
@@ -128,6 +128,6 @@ def edit_long_url(db: Session, entry_id: int, new_long_url: str, email: str, old
             db.commit()
             return
         
-        raise NOT_FOUND_EXCEPTION
+        raise Not_Found
     except Exception as e:
         raise e

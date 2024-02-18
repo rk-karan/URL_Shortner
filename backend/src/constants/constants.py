@@ -92,3 +92,6 @@ NULL_ENTRY_IN_URLS_MAPPING = {
 
 ## Date time format
 DATE_TIME_FORMAT = "%Y-%m-%d %H:%M:%S.%f"
+
+# Key to access X-Process-Time in response headers
+X_PROCESS_TIME_KEY = "X-Process-Time"
