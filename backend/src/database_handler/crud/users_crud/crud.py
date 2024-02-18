@@ -1,14 +1,13 @@
-from auth import auth_handler
-
+"""This module contains the CRUD operations for the users.
+"""
 from sqlalchemy.orm import Session
 
-from constants import NULL_TEXT
-from database_handler.models import USERS
-from exceptions.exceptions import INVALID_USER_EXCEPTION
-from database_handler.models import URLS_Mapping
-from database_handler.schemas import NEW_USER_REQUEST, USER_LOGIN, USER
-
-from exceptions.exceptions import USER_ALREADY_EXISTS_EXCEPTION
+from auth import auth_handler
+from database_handler.schemas import USER
+from base62conversions import decimal_to_base62
+from database_handler.models import USERS, URLS_Mapping
+from constants import NULL_ENTRY_IN_URLS_MAPPING, USER_EMAIL_KEY
+from exceptions.exceptions import INVALID_USER_EXCEPTION, MISSING_PARAMS_EXCEPTION, USER_ALREADY_EXISTS_EXCEPTION
 
 def create_pay_load(user: str, email: str):
     """Creates the payload for a given name and email.
@@ -20,10 +19,73 @@ def create_pay_load(user: str, email: str):
     Returns:
         dict: Payload for a given user.
     """
+    if not user or not email:
+        raise MISSING_PARAMS_EXCEPTION
+    
     payload = {"user" : USER(name = user, email = email).dict()}
     return payload
 
-def login_user(db: Session , user : USER_LOGIN):
+def get_urls(user: dict= None, urls= []):
+    """Returns the user and urls in a dictionary.
+
+    Args:
+        user (dict): user token dict. Defaults to None.
+        urls (list): Defaults to [].
+
+    Raises:
+        MISSING_PARAMS_EXCEPTION
+    """
+    
+    if not user:
+        raise MISSING_PARAMS_EXCEPTION
+        
+    for url in urls:
+        url.update({'short_url': decimal_to_base62(int(url.get('id')))})
+
+    return { 'user': user, 'urls': urls }
+    
+def check_user(db: Session, email: str):
+    """Checks the presence of a user in the db using user email.
+
+    Args:
+        db (Session): DB Session
+        email (str): Email of the user
+
+    Returns:
+        bool: True if the user with given email exists.
+    """
+    try:
+        if not email:
+            raise MISSING_PARAMS_EXCEPTION
+        
+        return db.query(USERS).filter(USERS.email == email).first()
+    except Exception as e:
+        raise e
+
+def add_user(db: Session, email: str, password: str, name: str):
+    """Adds a new user to the db.
+
+    Args:
+        db (Session): DB Session
+        create_user_request (NEW_USER_REQUEST): NEW_USER_REQUEST class
+    """
+    try:
+        if not email or not password or not name:
+            raise MISSING_PARAMS_EXCEPTION
+        
+        if check_user(db, email):
+            raise USER_ALREADY_EXISTS_EXCEPTION
+        
+        hashed_password = auth_handler.get_hashed_password(password)
+        new_entry = USERS(name=name, email=email, hashed_password=hashed_password)
+        db.add(new_entry)
+        db.commit()
+        db.refresh(new_entry)
+        
+    except Exception as e:
+        raise e
+
+def login_user(db: Session, email: str, password: str):
     """
 
     Args:
@@ -37,70 +99,23 @@ def login_user(db: Session , user : USER_LOGIN):
         str: JWT Token after successful login
     """
     try:
-        if not user:
+        if not email or not password:
             raise INVALID_USER_EXCEPTION
         
-        stored_user = db.query(USERS).filter(USERS.email == user.email).first()
+        stored_user = db.query(USERS).filter(USERS.email == email).first()
         
         if not stored_user:
             raise INVALID_USER_EXCEPTION
         
-        if auth_handler.verify_password(user.password, stored_user.hashed_password):
+        if auth_handler.verify_password(password, stored_user.hashed_password):
             return f"{auth_handler.create_access_token(payload = create_pay_load(stored_user.name, stored_user.email))}"
         
         raise INVALID_USER_EXCEPTION
        
     except Exception as e:
         raise e
-    
-def check_user(db: Session, email: str):
-    """Checks the presence of a user in the db using user email.
 
-    Args:
-        db (Session): DB Session
-        email (str): Email of the user
-
-    Returns:
-        bool: True if the user with given email exists.
-    """
-    try:
-        return db.query(USERS).filter(USERS.email == email).first()
-    except Exception as e:
-        raise e
-
-def add_user(db: Session, create_user_request: NEW_USER_REQUEST):
-    """Adds a new user to the db.
-
-    Args:
-        db (Session): DB Session
-        create_user_request (NEW_USER_REQUEST): NEW_USER_REQUEST class
-    """
-    try:
-        if check_user(db, create_user_request.email):
-            raise USER_ALREADY_EXISTS_EXCEPTION
-        
-        hashed_password = auth_handler.get_hashed_password(create_user_request.password)
-        new_entry = USERS(name=create_user_request.name, email=create_user_request.email, hashed_password=hashed_password)
-        db.add(new_entry)
-        db.commit()
-        db.refresh(new_entry)
-        
-    except Exception as e:
-        raise e
-
-def get_all_users(db: Session):
-    """Returns all the users in the database.
-
-    Args:
-        db (Session): DB Session
-    """
-    try:
-        users = db.query(USERS).all()
-        return users
-    except Exception as e:
-        raise e
-    
-def get_urls(db: Session, email: str):
+def get_user_profile_content(db: Session, user: dict):
     """Retrieves all the shortened urls made by the user with given email.
 
     Args:
@@ -111,14 +126,36 @@ def get_urls(db: Session, email: str):
         list: All urls made by the user with given email.
     """
     try:
-        urls_data = db.query(URLS_Mapping.id, URLS_Mapping.long_url).filter(URLS_Mapping.email == email).all()
-        return [{"id": id, "long_url": long_url} for id, long_url in urls_data]
+        if not user or not user.get(USER_EMAIL_KEY):
+            raise MISSING_PARAMS_EXCEPTION
+        
+        urls_data = db.query(URLS_Mapping.id, URLS_Mapping.long_url).filter(URLS_Mapping.email == user.get(USER_EMAIL_KEY)).all()
+        processed_url_data = [{"id": id, "long_url": long_url} for id, long_url in urls_data]
+        
+        return get_urls(user = user, urls = processed_url_data)
     except Exception as e:
         raise e
 
-def change_user_password(db: Session, email: str, new_password: str):
+def change_user_password(db: Session, email: str, new_password: str, old_password: str):
+    """Changes the password of the user with given email.
+
+    Args:
+        db (Session): DB Session
+        email (str): Email of the user
+        new_password (str): New password
+        old_password (str): Old password
+
+    Raises:
+        MISSING_PARAMS_EXCEPTION
+        INVALID_USER_EXCEPTION
+    """
     try:
-        if not check_user(db, email):
+        if not email or not new_password or not old_password:
+            raise MISSING_PARAMS_EXCEPTION
+        
+        stored_user = db.query(USERS).filter(USERS.email == email).first()
+        
+        if not stored_user and not auth_handler.verify_password(old_password, stored_user.hashed_password):
             raise INVALID_USER_EXCEPTION
 
         hashed_password = auth_handler.get_hashed_password(new_password)
@@ -128,7 +165,7 @@ def change_user_password(db: Session, email: str, new_password: str):
     except Exception as e:
         raise e
 
-def delete_user(db: Session, email: str):
+def delete_user_by_email(db: Session, email: str):
     """Deletes the user with given email from the db.
 
     Args:
@@ -139,10 +176,10 @@ def delete_user(db: Session, email: str):
         INVALID_USER_EXCEPTION
     """
     try:
-        if not check_user(db, email):
-            raise INVALID_USER_EXCEPTION
+        if not email:
+            INVALID_USER_EXCEPTION
 
-        db.query(URLS_Mapping).filter(URLS_Mapping.email == email).update({"email": NULL_TEXT, "long_url": NULL_TEXT})
+        db.query(URLS_Mapping).filter(URLS_Mapping.email == email).update(NULL_ENTRY_IN_URLS_MAPPING)
         db.commit()
         
         db.query(USERS).filter(USERS.email == email).delete()

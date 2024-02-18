@@ -10,9 +10,10 @@ from sqlalchemy.orm import sessionmaker, declarative_base
 
 from logger.logger import logger
 
-load_dotenv()
-
 # Load Environment Variables
+env_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), 'config', '.env')
+load_dotenv(dotenv_path=env_path)
+
 DB_URL= os.getenv("DB_URL")
 DB_NAME= os.getenv("DB_NAME")
 DB_USERNAME = os.getenv("DB_USERNAME")

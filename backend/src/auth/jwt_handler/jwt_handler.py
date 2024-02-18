@@ -1,28 +1,35 @@
+"""This module is used to handle JWT operations.
+"""
+
 import os
 import jwt
-
-from logger import logger
-
 from dotenv import load_dotenv
 from datetime import datetime, timedelta
-
 from passlib.context import CryptContext
-from exceptions.exceptions import INVALID_USER_EXCEPTION
+
+from logger import logger
 from constants import PAYLOAD_USER_KEY, PAYLOAD_EXPIRY_KEY, DATE_TIME_FORMAT
+from exceptions.exceptions import INVALID_USER_EXCEPTION, MISSING_PARAMS_EXCEPTION
 from ..OAuth2.OAuth2PasswordBearerWithCookie import OAuth2PasswordBearerWithCookie
 
-load_dotenv()
-
 # Load Environment Variables
+env_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), 'config', '.env')
+load_dotenv(dotenv_path=env_path)
+
 SECRET_KEY = os.getenv("SECRET_KEY")
 ALGORITHM = os.getenv("ALGORITHM")
 ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES"))
 
+# Constants
+ENCRYPTION_SCHEME = "bcrypt"
+TOKEN_URL = "/user/login"
+DEPRECATION_WARNING = "auto"
+
 # Setup Bcrypt Context
-BCRYPT_CONTEXT = CryptContext(schemes=["bcrypt"], deprecated="auto")
+BCRYPT_CONTEXT = CryptContext(schemes=[ENCRYPTION_SCHEME], deprecated=DEPRECATION_WARNING)
 
 # Setup OAuth2 Scheme
-O2AUTH2_SCHEME = OAuth2PasswordBearerWithCookie(tokenUrl="/user/login")
+O2AUTH2_SCHEME = OAuth2PasswordBearerWithCookie(tokenUrl=TOKEN_URL)
 
 class JWT_Handler:
     """This class is used to handle JWT operations.
@@ -32,7 +39,7 @@ class JWT_Handler:
             self._logger = logger
             
             if not SECRET_KEY or not ALGORITHM or not ACCESS_TOKEN_EXPIRE_MINUTES or not BCRYPT_CONTEXT:
-                raise Exception("SECRET_KEY, ALGORITHM, ACCESS_TOKEN_EXPIRE_MINUTES are required")
+                raise MISSING_PARAMS_EXCEPTION
             
             self._SECRET_KEY = SECRET_KEY
             self._ALGORITHM = ALGORITHM

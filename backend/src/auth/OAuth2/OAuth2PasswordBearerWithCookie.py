@@ -1,16 +1,10 @@
-from typing import Dict
-
-from fastapi import status
-from typing import Optional
-from fastapi import Request
-from fastapi import HTTPException
+from typing import Dict, Optional
 from fastapi.security import OAuth2
-
-from constants import ACCESS_TOKEN_KEY, AUTHORIZATION_SCHEME
-
+from fastapi import status, Request, HTTPException
 from fastapi.openapi.models import OAuthFlows as OAuthFlowsModel
 from fastapi.security.utils import get_authorization_scheme_param
 
+from constants import ACCESS_TOKEN_KEY, AUTHORIZATION_SCHEME, INVALID_USER_MESSAGE
 
 class OAuth2PasswordBearerWithCookie(OAuth2):
     """This class is used to handle OAuth2 Password Bearer with HTTP-Only Cookie.
@@ -38,7 +32,7 @@ class OAuth2PasswordBearerWithCookie(OAuth2):
             if self.auto_error:
                 raise HTTPException(
                     status_code=status.HTTP_401_UNAUTHORIZED,
-                    detail="Invalid user",
+                    detail=INVALID_USER_MESSAGE,
                     headers={"WWW-Authenticate": AUTHORIZATION_SCHEME},
                 )
             else:
