@@ -1,7 +1,9 @@
 import axios from "axios";
 
+export const baseURL = "http://localhost:8000/"
+
 const API = axios.create({
-    baseURL: 'http://localhost:8000/',
+    baseURL: baseURL,
     withCredentials: true,
     credentials: 'include'
 });
@@ -20,4 +22,13 @@ export const createUser = (data) => {
 
 export const logoutUser = () => {
     return API.post('/user/logout');
+}
+
+export const createShortUrl = (data)  =>{
+    return API.post('/url/create_url', {...data})
+}
+
+export const redirectURL = (data) => {
+    console.log(`${baseURL}${data}`);
+    return API.get(`${baseURL}${data}`);
 }

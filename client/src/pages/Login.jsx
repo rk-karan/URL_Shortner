@@ -29,13 +29,13 @@ const Login = () => {
         if (err) return;
 
         try {
-            let rc = 200;
+            let rc = 201;
             if (!isSignIn) {
                 const res = await createUser({ "name": nameRef.current.value, "email": emailRef.current.value, "password": passwordRef.current.value });
                 rc = res.status;
             }
 
-            if (rc === 200) {
+            if (rc === 201) {
                 const formData = new FormData();
                 formData.append('username', emailRef.current.value);
                 formData.append('password', passwordRef.current.value);

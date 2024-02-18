@@ -61,7 +61,6 @@ const Header = () => {
                         <Button color="inherit" onClick={handleSignIn}>Sign in</Button> :
                         <Button color="inherit" onClick={handleLogout}>Logout</Button>
                     }
-                    <Button color="inherit" onClick={() => navigate('/books')}>Books</Button>
                 </Toolbar>
             </AppBar>
         </Box>

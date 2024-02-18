@@ -33,7 +33,7 @@ app.add_middleware(
 )
 
 try:
-    Base.metadata.create_all(bind=db_connector.engine)
+    Base.metadata.create_all(bind=db_connector._engine)
     logger.log("Database tables initialized")
 except Exception as e:
     logger.log(f"Error initializing database tables: {e}", error_tag=True)
@@ -50,6 +50,7 @@ def home():
 
 @app.get("/{short_url}", tags=["redirection"])
 def redirect_short_url(short_url: str , db: Session = Depends(db_connector.get_db)):
+    print(short_url)
     try:
         original_url = get_original_url(db , short_url)
         return RedirectResponse(url = original_url)
