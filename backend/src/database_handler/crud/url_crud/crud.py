@@ -101,7 +101,6 @@ def delete_url(db: Session, entry_id: int, email: str, long_url: str):
             return
             
         raise Not_Found
-    
     except Exception as e:
         raise e
     

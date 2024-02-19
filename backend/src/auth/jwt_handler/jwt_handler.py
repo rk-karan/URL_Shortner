@@ -140,7 +140,7 @@ class JWT_Handler:
             payload = self.verify_token(token)
             return payload.get(PAYLOAD_USER_KEY)
         except Exception as e:
-            raise e
+            raise Invalid_User(e)
 
 # Initialize the JWT Handler
 auth_handler = JWT_Handler()

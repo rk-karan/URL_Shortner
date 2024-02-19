@@ -1,16 +1,21 @@
 import os
+import time
 import socket
 import uvicorn
 from typing import Union
 from dotenv import load_dotenv
 from sqlalchemy.orm import Session
-from fastapi import FastAPI, Depends
+from fastapi import FastAPI, Depends, status, Response
 from fastapi.responses import RedirectResponse
 from fastapi.middleware.cors import CORSMiddleware
+# from starlette.middleware.cors import CORSMiddleware
 
 from logger import logger
 from utils import send_response
+from utils import get_processing_time
+from constants import X_PROCESS_TIME_KEY
 from database_handler.models import Base
+from middleware import X_Process_Time_Middleware
 from database_handler.crud import get_original_url
 from routes.url_routes import routes as url_routes
 from routes.user_routes import routes as user_routes
@@ -26,7 +31,8 @@ load_dotenv(dotenv_path=env_path)
 
 ORIGINS = os.getenv("ORIGINS")
 
-app.add_middleware(CORSMiddleware, allow_origins=ORIGINS, allow_credentials=True, allow_methods=["*"], allow_headers=["*"])
+app.add_middleware(X_Process_Time_Middleware)
+app.add_middleware(CORSMiddleware, allow_origins=ORIGINS, allow_credentials=True, allow_methods=["*"], allow_headers=["*"],)
 
 try:
     Base.metadata.create_all(bind=db_connector._engine)
@@ -35,16 +41,16 @@ except Exception as e:
     logger.log(f"Error initializing database tables: {e}", error_tag=True)
 
 # Routes
-@app.get("/", tags=["test"])
+@app.get("/", tags=["test"], status_code=status.HTTP_200_OK, summary="Home Page", response_description="Welcome message")
 def home() -> Union[dict, str]:
-    response = {
+    content = {
         "message": "Welcome to the URL Shortener API!",
         "hostname": socket.gethostname()
     }
-    logger.log(f"Home Page Accessed by{socket.gethostname()}")
-    return send_response(content=response, status_code=200)
+    logger.log(f"Home Page Accessed by {socket.gethostname()}")
+    return content
 
-@app.get("/{short_url}", tags=["redirection"])
+@app.get("/{short_url}", tags=["redirection"], status_code=status.HTTP_302_FOUND, summary="Redirects to the original URL", response_description="Redirect response to the original URL")
 def redirect_short_url(short_url: str , db: Session = Depends(db_connector.get_db)):
     try:
         original_url = get_original_url(db , short_url)
@@ -55,7 +61,7 @@ def redirect_short_url(short_url: str , db: Session = Depends(db_connector.get_d
 
         return RedirectResponse(url = original_url)
     except Exception as e:
-        return send_response(content={e}, status_code=500, error_tag=True)
+        return send_response(content={e}, status_code=status.HTTP_400_BAD_REQUEST, error_tag=True)
 
 app.include_router(user_routes.router)
 app.include_router(url_routes.router)
