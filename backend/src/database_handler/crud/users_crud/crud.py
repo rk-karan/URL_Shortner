@@ -3,13 +3,13 @@
 from sqlalchemy.orm import Session
 
 from auth import auth_handler
-from database_handler.schemas import USER
+from database_handler.schemas import USER, PAYLOAD
 from base62conversions import decimal_to_base62
 from database_handler.models import USERS, URLS_Mapping
 from constants import NULL_ENTRY_IN_URLS_MAPPING, USER_EMAIL_KEY
-from exceptions.exceptions import INVALID_USER_EXCEPTION, MISSING_PARAMS_EXCEPTION, USER_ALREADY_EXISTS_EXCEPTION
+from exceptions.exceptions import User_Already_Exists, Invalid_User, Missing_Params
 
-def create_pay_load(user: str, email: str):
+def create_pay_load(name: str, email: str):
     """Creates the payload for a given name and email.
 
     Args:
@@ -19,11 +19,10 @@ def create_pay_load(user: str, email: str):
     Returns:
         dict: Payload for a given user.
     """
-    if not user or not email:
-        raise MISSING_PARAMS_EXCEPTION
+    if not name or not email:
+        raise Missing_Params
     
-    payload = {"user" : USER(name = user, email = email).dict()}
-    return payload
+    return PAYLOAD(user= USER(name = name, email = email).dict()).dict()
 
 def get_urls(user: dict= None, urls= []):
     """Returns the user and urls in a dictionary.
@@ -37,7 +36,7 @@ def get_urls(user: dict= None, urls= []):
     """
     
     if not user:
-        raise MISSING_PARAMS_EXCEPTION
+        raise Missing_Params
         
     for url in urls:
         url.update({'short_url': decimal_to_base62(int(url.get('id')))})
@@ -56,7 +55,7 @@ def check_user(db: Session, email: str):
     """
     try:
         if not email:
-            raise MISSING_PARAMS_EXCEPTION
+            raise Missing_Params
         
         return db.query(USERS).filter(USERS.email == email).first()
     except Exception as e:
@@ -71,10 +70,10 @@ def add_user(db: Session, email: str, password: str, name: str):
     """
     try:
         if not email or not password or not name:
-            raise MISSING_PARAMS_EXCEPTION
+            raise Missing_Params
         
         if check_user(db, email):
-            raise USER_ALREADY_EXISTS_EXCEPTION
+            raise User_Already_Exists
         
         hashed_password = auth_handler.get_hashed_password(password)
         new_entry = USERS(name=name, email=email, hashed_password=hashed_password)
@@ -100,17 +99,17 @@ def login_user(db: Session, email: str, password: str):
     """
     try:
         if not email or not password:
-            raise INVALID_USER_EXCEPTION
+            raise Invalid_User
         
         stored_user = db.query(USERS).filter(USERS.email == email).first()
         
         if not stored_user:
-            raise INVALID_USER_EXCEPTION
+            raise Invalid_User
         
         if auth_handler.verify_password(password, stored_user.hashed_password):
             return f"{auth_handler.create_access_token(payload = create_pay_load(stored_user.name, stored_user.email))}"
         
-        raise INVALID_USER_EXCEPTION
+        raise Invalid_User
        
     except Exception as e:
         raise e
@@ -127,7 +126,7 @@ def get_user_profile_content(db: Session, user: dict):
     """
     try:
         if not user or not user.get(USER_EMAIL_KEY):
-            raise MISSING_PARAMS_EXCEPTION
+            raise Missing_Params
         
         urls_data = db.query(URLS_Mapping.id, URLS_Mapping.long_url).filter(URLS_Mapping.email == user.get(USER_EMAIL_KEY)).all()
         processed_url_data = [{"id": id, "long_url": long_url} for id, long_url in urls_data]
@@ -151,12 +150,12 @@ def change_user_password(db: Session, email: str, new_password: str, old_passwor
     """
     try:
         if not email or not new_password or not old_password:
-            raise MISSING_PARAMS_EXCEPTION
+            raise Missing_Params
         
         stored_user = db.query(USERS).filter(USERS.email == email).first()
         
         if not stored_user and not auth_handler.verify_password(old_password, stored_user.hashed_password):
-            raise INVALID_USER_EXCEPTION
+            raise Invalid_User
 
         hashed_password = auth_handler.get_hashed_password(new_password)
         db.query(USERS).filter(USERS.email == email).update({"hashed_password": hashed_password})
@@ -177,7 +176,7 @@ def delete_user_by_email(db: Session, email: str):
     """
     try:
         if not email:
-            INVALID_USER_EXCEPTION
+            Invalid_User
 
         db.query(URLS_Mapping).filter(URLS_Mapping.email == email).update(NULL_ENTRY_IN_URLS_MAPPING)
         db.commit()

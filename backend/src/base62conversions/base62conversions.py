@@ -50,8 +50,7 @@ def base62_to_decimal(base62_string: str):
         base62_dict = {char: index for index, char in enumerate(CHARACTERS)}
         decimal_num = 0
         base = 62
-        print(base62_dict)
-        print(base62_string)
+        
         for char in base62_string:
             decimal_num = decimal_num * base + base62_dict[char]
         

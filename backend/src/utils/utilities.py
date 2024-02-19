@@ -1,7 +1,15 @@
 from logger import logger
 import json
+import time
 from fastapi.responses import JSONResponse
 from fastapi import HTTPException
+from exceptions.exceptions import Missing_Params
+
+def get_processing_time(start_time):
+    if not start_time:
+        raise Missing_Params
+
+    return str(time.time() - start_time)
 
 def send_response(content=None, status_code=None, error_tag=False):
     try:
