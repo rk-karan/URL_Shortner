@@ -15,13 +15,9 @@ from database_handler.models import Base
 from middleware import X_Process_Time_Middleware
 from database_handler.crud import get_original_url
 from routes.url_routes import routes as url_routes
-<<<<<<< HEAD
-from fastapi.middleware.cors import CORSMiddleware
-=======
 from routes.user_routes import routes as user_routes
 from database_handler.db_connector import db_connector
 from exceptions.exceptions import Invalid_Redirection_Request
->>>>>>> branch_rohit
 
 app = FastAPI()
 logger.log("FastAPI app initialized")
