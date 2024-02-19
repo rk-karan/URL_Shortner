@@ -5,7 +5,7 @@ import SendIcon from '@mui/icons-material/Send';
 import './UrlInput.css';
 import { checkValidUrl } from "../utils/validate";
 import {createShortUrl, getUser} from "../utils/api";
-import { UseDispatch, useDispatch } from 'react-redux';
+import {useDispatch } from 'react-redux';
 import { addUser } from '../redux/userSlice';
 
 const UrlInput = () => {
@@ -24,7 +24,7 @@ const UrlInput = () => {
         console.log("Here")
         const userRes = await getUser()
         if(userRes.status === 200){
-          dispatch(addUser(JSON.parse(userRes.data)));
+          dispatch(addUser(userRes.data));
         }
         urlRef.current.value = '';
       }else{

@@ -20,7 +20,7 @@ const Header = () => {
             try {
                 const res = await getUser();
                 if (res.status === 200 && !user) {
-                    dispatch(addUser(JSON.parse(res.data)));
+                    dispatch(addUser(res.data));
                     navigate('/');
                 }
             } catch (err) {

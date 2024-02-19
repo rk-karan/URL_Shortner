@@ -13,7 +13,7 @@ const  Body = () => {
       if(!user){
          navigate('/login');
       }
-   }, [user]);
+   }, [user, navigate]);
    return (
     <div className='body-container'>
       <UrlInput/>

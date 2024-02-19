@@ -2,7 +2,7 @@ import React from 'react';
 import {useSelector } from 'react-redux';
 import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper } from '@mui/material';
 import './DisplayTable.css';
-import {baseURL , redirectURL} from "../utils/api";
+import {baseURL} from "../utils/api";
 
 const DisplayUrlMapping = () => {
     const user = useSelector(store => store.user);
@@ -11,23 +11,7 @@ const DisplayUrlMapping = () => {
     }
     const handleClickShortUrl = async(e, short_url) => {
         e.preventDefault();
-        try {
-            const response = await fetch(`http://localhost:8000/${short_url}`);
-            if (response.ok) {
-              // If response status is in the 300 range, it's a redirect
-              if (response.status >= 300 && response.status < 400) {
-                const redirectUrl = response.headers.get('Location');
-                if (redirectUrl) {
-                  window.location.href = redirectUrl; // Redirect the user to the new URL
-                }
-              }
-              // Handle other responses if needed
-            } else {
-              throw new Error('Failed to fetch data');
-            }
-          } catch (error) {
-            console.error('Error fetching data:', error);
-          }
+        window.location.href = `${baseURL}${short_url}`
     }
   return (
     <div>

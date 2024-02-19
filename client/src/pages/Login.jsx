@@ -43,7 +43,8 @@ const Login = () => {
 
                 if (res.status === 200) {
                     const user = await getUser();
-                    dispatch(addUser(JSON.parse(user.data)));
+                    console.log(user)
+                    dispatch(addUser(user.data));
                     emailRef.current.value = '';
                     passwordRef.current.value = '';
                     navigate('/');
