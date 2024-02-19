@@ -1,23 +1,23 @@
 import os
-import time
 import socket
 import uvicorn
 from typing import Union
 from dotenv import load_dotenv
 from sqlalchemy.orm import Session
-from fastapi import FastAPI, Depends, status
+from fastapi import FastAPI, Depends, status, BackgroundTasks
 from fastapi.responses import RedirectResponse
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.middleware.gzip import GZipMiddleware
 
 from logger import logger
 from utils import send_response
 from database_handler.models import Base
-from middleware import X_Process_Time_Middleware
-from database_handler.crud import get_original_url
 from routes.url_routes import routes as url_routes
 from routes.user_routes import routes as user_routes
 from database_handler.db_connector import db_connector
 from exceptions.exceptions import Invalid_Redirection_Request
+from middleware import X_Process_Time_Middleware, RateLimitingMiddleware
+from database_handler.crud import get_original_url, increment_hit_count
 
 app = FastAPI()
 logger.log("FastAPI app initialized")
@@ -27,10 +27,13 @@ env_path = os.path.join(os.path.dirname(__file__), 'config', '.env')
 load_dotenv(dotenv_path=env_path)
 
 ORIGINS = os.getenv("ORIGINS")
-MAX_AGE_CORS_CACHE = os.getenv("MAX_AGE_CORS_CACHE")
+MAX_AGE_CORS_CACHE = int(os.getenv("MAX_AGE_CORS_CACHE"))
+GZIP_MINIMUM_SIZE = int(os.getenv("GZIP_MINIMUM_SIZE"))
 
+# app.add_middleware(RateLimitingMiddleware)
 app.add_middleware(X_Process_Time_Middleware)
 app.add_middleware(CORSMiddleware, allow_origins=ORIGINS, allow_credentials=True, allow_methods=["*"], allow_headers=["*"], max_age=MAX_AGE_CORS_CACHE,)
+app.add_middleware(GZipMiddleware, minimum_size=GZIP_MINIMUM_SIZE)
 
 try:
     Base.metadata.create_all(bind=db_connector._engine)
@@ -48,16 +51,16 @@ def home() -> Union[dict, str]:
     logger.log(f"Home Page Accessed by {socket.gethostname()}")
     return content
 
-@app.get("/{short_url}", tags=["redirection"], status_code=status.HTTP_302_FOUND, summary="Redirects to the original URL", response_description="Redirect response to the original URL")
-def redirect_short_url(short_url: str , db: Session = Depends(db_connector.get_db)):
-    print(short_url)
+@app.get("/{short_url}", tags=["redirection"], status_code=status.HTTP_301_MOVED_PERMANENTLY, summary="Redirects to the original URL", response_description="Redirect response to the original URL")
+def redirect_short_url(background_tasks: BackgroundTasks, short_url: str , db: Session = Depends(db_connector.get_db)):
     try:
-        original_url = get_original_url(db , short_url)
+        original_url, _id = get_original_url(db=db , short_url=short_url)
         logger.log(f"Redirecting from {short_url} to {original_url}")
         
         if not original_url:
             raise Invalid_Redirection_Request
 
+        background_tasks.add_task(increment_hit_count, db=db, _id=_id)
         return RedirectResponse(url = original_url)
     except Exception as e:
         return send_response(content={e}, status_code=status.HTTP_400_BAD_REQUEST, error_tag=True)

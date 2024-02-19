@@ -84,7 +84,7 @@ class JWT_Handler:
             text: JWT Token
         """
         to_encode = payload.copy()
-        expiry = str(datetime.utcnow() + timedelta(minutes=self._ACCESS_TOKEN_EXPIRE_MINUTES))
+        expiry = str((datetime.utcnow() + timedelta(minutes=self._ACCESS_TOKEN_EXPIRE_MINUTES)))
         to_encode.update({"expiry": expiry})
         encoded_jwt = jwt.encode(to_encode, self._SECRET_KEY, algorithm=self._ALGORITHM)
         return encoded_jwt
