@@ -3,6 +3,8 @@ import {useSelector } from 'react-redux';
 import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper } from '@mui/material';
 import './DisplayTable.css';
 import {baseURL} from "../utils/api";
+import UpdateModal from './UpdateModal';
+import DeleteModal from './DeleteModal';
 
 const DisplayUrlMapping = () => {
     const user = useSelector(store => store.user);
@@ -23,22 +25,25 @@ const DisplayUrlMapping = () => {
             <Table>
                 <TableHead>
                 <TableRow>
-                    <TableCell>Index</TableCell>
-                    <TableCell>URL</TableCell>
-                    <TableCell>Mapping</TableCell>
+                    <TableCell align="center">Index</TableCell>
+                    <TableCell align="center">URL</TableCell>
+                    <TableCell align="center">Mapping</TableCell>
+                    <TableCell align="center">Actions</TableCell>
                 </TableRow>
                 </TableHead>
                 <TableBody>
                 {user?.urls?.map((url , index) => (
                     <TableRow key={url.id}>
-                    <TableCell>{index + 1}</TableCell>
-                    <TableCell>{url.long_url}</TableCell>
+                    <TableCell align="center">{index + 1}</TableCell>
+                    <TableCell align="center">{url.long_url}</TableCell>
                     <TableCell 
                     sx = {{
-                        cursor: 'pointer'
+                        cursor: 'pointer',
                     }}
+                    align="center"
                     onClick={(e)=> handleClickShortUrl(e, url.short_url)}
                     >{`${baseURL}${url.short_url}`}</TableCell>
+                    <TableCell align="center"><span className='update-btn'><UpdateModal url = {url}/></span><span className='delete-button'><DeleteModal url = {url}/></span></TableCell>
                     </TableRow>
                 ))}
                 </TableBody>

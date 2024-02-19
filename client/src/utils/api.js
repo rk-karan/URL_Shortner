@@ -32,3 +32,13 @@ export const redirectURL = (data) => {
     console.log(`${baseURL}${data}`);
     return API.get(`${baseURL}${data}`);
 }
+
+export const updateURL = (data) => {
+    console.log(data);
+    return API.put('/url/edit_url' , {...data});
+}
+
+export const deleteURL = (data) => {
+    console.log(data);
+    return API.put('/url/delete_url' , {...data});
+}
