@@ -30,7 +30,7 @@ ORIGINS = os.getenv("ORIGINS")
 MAX_AGE_CORS_CACHE = os.getenv("MAX_AGE_CORS_CACHE")
 
 app.add_middleware(X_Process_Time_Middleware)
-app.add_middleware(CORSMiddleware, allow_origins=ORIGINS, allow_credentials=True, allow_methods=["*"], allow_headers=["*"], max_age=MAX_AGE_CORS_CACHE)
+app.add_middleware(CORSMiddleware, allow_origins=ORIGINS, allow_credentials=True, allow_methods=["*"], allow_headers=["*"], max_age=MAX_AGE_CORS_CACHE,)
 
 try:
     Base.metadata.create_all(bind=db_connector._engine)
