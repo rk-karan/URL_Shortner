@@ -18,6 +18,9 @@ MISSING_PARAMS_MESSAGE = "Initialization parameters missing"
 # Invalid redirection request message. Generally occurs when the redirection request is invalid.
 INVALID_REDIRECT_REQUEST_MESSAGE = "Invalid redirection request"
 
+# URL create limit reached message. Generally occurs when the URL create limit is reached.
+URL_CREATE_LIMIT_REACHED = "URL Create Limit Reached"
+
 ## User CRUD messages
 
 # Signup success message. Generally occurs when the user is signed up successfully.
@@ -46,6 +49,9 @@ DELETE_URL_SUCCESS_MESSAGE = "URL deleted successfully"
 # URL edit success message. Generally occurs when the URL is edited successfully.
 EDIT_URL_SUCCESS_MESSAGE = "URL edited successfully"
 
+# URL already exists message. Generally occurs when the URL already exists in the database.
+URL_CREATE_URL_ALREADY_EXISTS = "URL already exists"
+
 ## Authorization constants
 
 # Access Token access key
@@ -68,6 +74,15 @@ PAYLOAD_USER_KEY = "user"
 # Key to access long url in request
 LONG_URL_KEY = "long_url"
 
+# Key to access hit_count
+URL_HIT_COUNT_KEY = "hit_count"
+
+# Key to access created on
+URL_CREATED_ON_KEY = "created_on"
+
+# Key to access edited on
+URL_EDITED_ON_KEY = "edited_on"
+
 # Key to access expiry in payload
 PAYLOAD_EXPIRY_KEY = "expiry"
 
@@ -84,10 +99,14 @@ DOMAIN_NAME = "http://localhost:8000"
 ## NULL text
 NULL_TEXT = "NULL"
 
+## NULL integer
+NULL_INTEGER = 0
+
 ## NULL Field in URLS_MAPPING DB
 NULL_ENTRY_IN_URLS_MAPPING = {
     "email": NULL_TEXT,
-    "long_url": NULL_TEXT
+    "long_url": NULL_TEXT,
+    "hit_count": NULL_INTEGER,
 }
 
 ## Date time format

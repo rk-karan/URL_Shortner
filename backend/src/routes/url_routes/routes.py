@@ -1,16 +1,14 @@
-import time
 from logger import logger
 from auth import auth_handler
 from utils import send_response
-
 from typing import Union
 from sqlalchemy.orm import Session
 from fastapi import APIRouter, Depends, Body, status
 from exceptions.exceptions import Invalid_User
 from database_handler.db_connector import db_connector
-from constants import DELETE_URL_SUCCESS_MESSAGE, USER_EMAIL_KEY, URLS_KEY
+from constants import USER_EMAIL_KEY, URLS_KEY
 from database_handler.crud import create_short_url, delete_url, edit_long_url, get_user_profile_content
-from database_handler.schemas import MESSAGE_RESPONSE, LONG_URL_DELETE_REQUEST, LONG_URL_CREATE_RESPONSE, LONG_URL_CREATE_REQUEST, LONG_URL_EDIT_REQUEST, LONG_URL_EDIT_RESPONSE
+from database_handler.schemas import MESSAGE_RESPONSE, LONG_URL_DELETE_REQUEST, LONG_URL_CREATE_RESPONSE, LONG_URL_CREATE_REQUEST, LONG_URL_EDIT_REQUEST, LONG_URL_EDIT_RESPONSE, LONG_URL_DELETE_RESPONSE
 
 router = APIRouter(
     prefix="/url",
@@ -85,7 +83,8 @@ async def delete_long_url(long_url_delete_request: LONG_URL_DELETE_REQUEST = Bod
         delete_url(db , entry_id=int(long_url_delete_request.entry_id),long_url=long_url_delete_request.long_url, email=user.get(USER_EMAIL_KEY))
         logger.log(f"SUCCESSFUL: Short URL Deleted", error_tag=False)
         
-        return MESSAGE_RESPONSE(message=DELETE_URL_SUCCESS_MESSAGE).dict()
+        content = get_user_profile_content(db, user)
+        return LONG_URL_DELETE_RESPONSE(urls = content.get(URLS_KEY)).dict()
     except Invalid_User as e:
         return send_response(content=e, status_code=status.HTTP_401_UNAUTHORIZED, error_tag=True)
     except Exception as e:
