@@ -19,7 +19,7 @@ router = APIRouter(
 )
 
 @router.post("/create_user", status_code=status.HTTP_201_CREATED, summary="Create a new user", response_description="User details")
-async def create_user(response: Response, user_create_request: USER_CREATE_REQUEST = Body(default=None), db: Session = Depends(db_connector.get_db)) -> Union[USER_CREATE_RESPONSE, dict]:
+async def create_user(user_create_request: USER_CREATE_REQUEST = Body(default=None), db: Session = Depends(db_connector.get_db)) -> Union[USER_CREATE_RESPONSE, dict]:
     """This api endpoint adds a new user to the db.
 
     Args:
@@ -146,4 +146,4 @@ async def logout(response: Response, token: str = Depends(auth_handler._O2AUTH2_
     except Invalid_User as e:
         return send_response(content=e, status_code=status.HTTP_401_UNAUTHORIZED, error_tag=True)
     except Exception as e:
-        return send_response(content=e, status_code=status.HTTP_401_UNAUTHORIZED, error_tag=True)
+        return send_response(content=e, status_code=status.HTTP_400_BAD_REQUEST, error_tag=True)
