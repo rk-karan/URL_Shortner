@@ -9,16 +9,25 @@ const DisplayUrlMapping = () => {
     if(!user){
         return;
     }
-    const handleClickShortUrl = async(e, id) => {
+    const handleClickShortUrl = async(e, short_url) => {
         e.preventDefault();
-        console.log(id);
-        try{
-            const res = await redirectURL(id);
-            console.log(res);
-        }
-        catch(err){
-            console.log(err);
-        }
+        try {
+            const response = await fetch(`http://localhost:8000/${short_url}`);
+            if (response.ok) {
+              // If response status is in the 300 range, it's a redirect
+              if (response.status >= 300 && response.status < 400) {
+                const redirectUrl = response.headers.get('Location');
+                if (redirectUrl) {
+                  window.location.href = redirectUrl; // Redirect the user to the new URL
+                }
+              }
+              // Handle other responses if needed
+            } else {
+              throw new Error('Failed to fetch data');
+            }
+          } catch (error) {
+            console.error('Error fetching data:', error);
+          }
     }
   return (
     <div>
@@ -44,8 +53,8 @@ const DisplayUrlMapping = () => {
                     sx = {{
                         cursor: 'pointer'
                     }}
-                    onClick={(e)=> handleClickShortUrl(e, url.id)}
-                    >{`${baseURL}${url.id}`}</TableCell>
+                    onClick={(e)=> handleClickShortUrl(e, url.short_url)}
+                    >{`${baseURL}${url.short_url}`}</TableCell>
                     </TableRow>
                 ))}
                 </TableBody>
