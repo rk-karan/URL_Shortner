@@ -5,15 +5,12 @@ import uvicorn
 from typing import Union
 from dotenv import load_dotenv
 from sqlalchemy.orm import Session
-from fastapi import FastAPI, Depends, status, Response
+from fastapi import FastAPI, Depends, status
 from fastapi.responses import RedirectResponse
 from fastapi.middleware.cors import CORSMiddleware
-# from starlette.middleware.cors import CORSMiddleware
 
 from logger import logger
 from utils import send_response
-from utils import get_processing_time
-from constants import X_PROCESS_TIME_KEY
 from database_handler.models import Base
 from middleware import X_Process_Time_Middleware
 from database_handler.crud import get_original_url

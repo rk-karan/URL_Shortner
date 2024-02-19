@@ -62,7 +62,7 @@ async def user_login(response: Response, form_data: OAuth2PasswordRequestForm = 
         return send_response(content=e, status_code=status.HTTP_400_BAD_REQUEST, error_tag=True)
 
 @router.get("/me", status_code=status.HTTP_200_OK, summary="Get the current user profile. (Details and URLS)", response_description="User details and URLs")
-async def get_user_me(response: Response, db: Session = Depends(db_connector.get_db), token: str = Depends(auth_handler._O2AUTH2_SCHEME)) -> Union[USER_PROFILE_RESPONSE, dict]:
+async def get_user_me(db: Session = Depends(db_connector.get_db), token: str = Depends(auth_handler._O2AUTH2_SCHEME)) -> Union[USER_PROFILE_RESPONSE, dict]:
     """This api endpoint retrieves all the information of the current active user. The user must be logged in.
 
     Args:
