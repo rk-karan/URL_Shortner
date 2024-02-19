@@ -37,10 +37,6 @@ def get_urls(user: dict= None, urls= []):
     
     if not user:
         raise Missing_Params
-        
-    for url in urls:
-        url.update({'short_url': decimal_to_base62(int(url.get('id')))})
-
     return { 'user': user, 'urls': urls }
     
 def check_user(db: Session, email: str):
@@ -128,8 +124,8 @@ def get_user_profile_content(db: Session, user: dict):
         if not user or not user.get(USER_EMAIL_KEY):
             raise Missing_Params
         
-        urls_data = db.query(URLS_Mapping.id, URLS_Mapping.long_url).filter(URLS_Mapping.email == user.get(USER_EMAIL_KEY)).all()
-        processed_url_data = [{"id": id, "long_url": long_url} for id, long_url in urls_data]
+        urls_data = db.query(URLS_Mapping.id, URLS_Mapping.long_url, URLS_Mapping.created_on, URLS_Mapping.edited_on, URLS_Mapping.hit_count).filter(URLS_Mapping.email == user.get(USER_EMAIL_KEY)).all()
+        processed_url_data = [{"id": id, "long_url": long_url, "short_url": decimal_to_base62(id), "created_on": created_on, "edited_on": edited_on, "hit_count": hit_count} for id, long_url, created_on, edited_on, hit_count in urls_data]
         
         return get_urls(user = user, urls = processed_url_data)
     except Exception as e:
