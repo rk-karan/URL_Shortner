@@ -7,11 +7,13 @@ from fastapi.security import OAuth2PasswordRequestForm
 from database_handler.db_connector import db_connector
 from fastapi import APIRouter, Depends, Body, Response, status
 from exceptions.exceptions import Invalid_User, User_Already_Exists
+from database_handler.schemas import User_Profile_Response, User_Validate_Token_Response
 from constants import ACCESS_TOKEN_KEY, AUTHORIZATION_SCHEME, USER_EMAIL_KEY, USER_NAME_KEY
+from database_handler.schemas import get_user_create_response, get_login_response, get_user_profile_response
+from database_handler.schemas import User_Delete_Response, User_Password_Update_Request, User_Password_Update_Response
 from database_handler.crud.users_crud.crud import add_user, login_user, get_user_profile_content, delete_user_by_email, change_user_password
 from database_handler.schemas import User_Create_Request, User_Create_Response, User_Logout_Response, User_Login_Request, User_Login_Response
-from database_handler.schemas import User_Delete_Response, User_Password_Update_Request, User_Password_Update_Response, User_Profile_Response
-from database_handler.schemas import get_user_create_response, get_login_response, get_user_profile_response, get_user_password_update_response
+from database_handler.schemas import get_user_password_update_response, get_user_validate_token_response, get_user_delete_response, get_user_logout_response
 
 router = APIRouter(
     prefix="/user",
@@ -30,7 +32,7 @@ async def create_user(user_create_request: User_Create_Request = Body(default=No
         add_user(db , name=user_create_request.name, email=user_create_request.email, password=user_create_request.password)
         logger.log(f"SUCCESSFUL: User: {user_create_request.email}, created", error_tag=False)
         
-        return get_user_create_response(name=user_create_request.name, email=user_create_request.email)
+        return get_user_create_response()
     except User_Already_Exists as e:
         return send_response(content=e, status_code=status.HTTP_409_CONFLICT, error_tag=True)
     except Exception as e:
@@ -55,11 +57,21 @@ async def user_login(response: Response, form_data: OAuth2PasswordRequestForm = 
         response.set_cookie(key = ACCESS_TOKEN_KEY, value =f"{AUTHORIZATION_SCHEME} {access_token}", httponly = True)
         logger.log(f"SUCCESSFUL: Token: {access_token}, sent", error_tag=False)
         
-        return get_login_response(name= name, email=user_login.email, access_token=access_token)
+        return get_login_response(access_token=access_token)
     except Invalid_User as e:
         return send_response(content=e, status_code=status.HTTP_401_UNAUTHORIZED, error_tag=True)
     except Exception as e:
         return send_response(content=e, status_code=status.HTTP_400_BAD_REQUEST, error_tag=True)
+
+@router.get("/validate_token", status_code=status.HTTP_200_OK, summary="Validate the JWT Token", response_description="Success message")
+async def validate_token(token: str = Depends(auth_handler._O2AUTH2_SCHEME)) -> Union[User_Validate_Token_Response, str]:
+    try:
+        user = auth_handler.get_current_user(token)
+        logger.log(f"SUCCESSFUL: User: {user.get(USER_EMAIL_KEY)}, token validated", error_tag=False)
+        
+        return get_user_validate_token_response()
+    except Exception as e:
+        return send_response(content=e, status_code=status.HTTP_401_UNAUTHORIZED, error_tag=True)
 
 @router.get("/me", status_code=status.HTTP_200_OK, summary="Get the current user profile. (Details and URLS)", response_description="User details and URLs")
 async def get_user_me(db: Session = Depends(db_connector.get_db), token: str = Depends(auth_handler._O2AUTH2_SCHEME)) -> Union[User_Profile_Response, str]:
@@ -94,7 +106,7 @@ async def change_password(response: Response, user_password_change: User_Passwor
         response.set_cookie(key=ACCESS_TOKEN_KEY, value=None)
         logger.log(f"SUCCESSFUL: Token: {token}, removed", error_tag=False)
 
-        return get_user_password_update_response(name= user.get(USER_NAME_KEY), email=user.get(USER_EMAIL_KEY))
+        return get_user_password_update_response()
     except Invalid_User as e:
         return send_response(content=e, status_code=status.HTTP_401_UNAUTHORIZED, error_tag=True)
     except Exception as e:
@@ -119,7 +131,7 @@ async def delete_user(response: Response, db: Session = Depends(db_connector.get
         response.set_cookie(key=ACCESS_TOKEN_KEY, value=None)
         logger.log(f"SUCCESSFUL: Token: {token}, removed", error_tag=False)
 
-        return User_Delete_Response().dict()
+        return get_user_delete_response()
     except Invalid_User as e:
         return send_response(content=e, status_code=status.HTTP_401_UNAUTHORIZED, error_tag=True)
     except Exception as e:
@@ -140,7 +152,7 @@ async def logout(response: Response, token: str = Depends(auth_handler._O2AUTH2_
         response.set_cookie(key=ACCESS_TOKEN_KEY, value=None)
         logger.log(f"SUCCESSFUL: Token: {token}, removed", error_tag=False)
         
-        return User_Logout_Response().dict()
+        return get_user_logout_response()
     except Invalid_User as e:
         return send_response(content=e, status_code=status.HTTP_401_UNAUTHORIZED, error_tag=True)
     except Exception as e:

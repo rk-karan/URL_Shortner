@@ -38,6 +38,8 @@ DELETE_USER_SUCCESS_MESSAGE = "User deleted successfully"
 # User profile update success message. Generally occurs when the user profile is updated successfully.
 CHANGE_PASSWORD_SUCCESS_MESSAGE = "Password changed successfully"
 
+VALIDATE_TOKEN_SUCCESS_MESSAGE = "Token validated"
+
 ## URL CRUD messages
 
 # URL create success message. Generally occurs when the URL is created successfully.
