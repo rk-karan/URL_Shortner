@@ -1,14 +1,14 @@
 """This module handles the CRUD operations for the URLS_Mapping table.
 """
 import os
+from logger import logger
 from datetime import datetime
+from dotenv import load_dotenv
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
-
 from database_handler.models import URLS_Mapping
-from dotenv import load_dotenv
-from exceptions.exceptions import Not_Found, Missing_Params, URL_Create_Limit_Reached, URL_Create_URL_Already_Exists
 from base62conversions.base62conversions import decimal_to_base62 , base62_to_decimal
+from exceptions.exceptions import Not_Found, Missing_Params, URL_Create_Limit_Reached, URL_Create_URL_Already_Exists
 from constants import DOMAIN_NAME, NULL_ENTRY_IN_URLS_MAPPING, USER_EMAIL_KEY, LONG_URL_KEY, NULL_INTEGER, URL_HIT_COUNT_KEY
 
 # Load Environment Variables
@@ -32,6 +32,7 @@ async def increment_hit_count(db: Session, _id: int):
         _id (int): ID of the URL
     """
     try:
+        logger.log(f"Incrementing hit count for URL with ID: {_id}")
         if not _id:
             raise Missing_Params
         
@@ -40,6 +41,8 @@ async def increment_hit_count(db: Session, _id: int):
         if existing_url:
             existing_url.hit_count = existing_url.hit_count+1
             db.commit()
+            
+            logger.log(f"SUCCESSFUL: Hit count incremented for URL with ID: {_id}")
             return
         
         raise Not_Found
@@ -72,6 +75,7 @@ def create_short_url(db: Session , long_url: str, email: str):
             existing_url.email = email
             existing_url.long_url = long_url
             existing_url.created_on = datetime.utcnow()
+            existing_url.edited_on = datetime.utcnow()
             existing_url.hit_count = NULL_INTEGER
             
             db.commit()
@@ -111,7 +115,7 @@ def get_original_url(db: Session, short_url: str):
         if item is None:
             raise Not_Found
 
-        return item.long_url, _id
+        return (item.long_url, _id)
     except Exception as e:
         raise e
 

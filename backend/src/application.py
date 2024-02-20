@@ -2,22 +2,22 @@ import os
 import socket
 import uvicorn
 from typing import Union
+from logger import logger
 from dotenv import load_dotenv
+from utils import send_response
 from sqlalchemy.orm import Session
-from fastapi import FastAPI, Depends, status, BackgroundTasks
+from database_handler.models import Base
 from fastapi.responses import RedirectResponse
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.gzip import GZipMiddleware
-
-from logger import logger
-from utils import send_response
-from database_handler.models import Base
 from routes.url_routes import routes as url_routes
 from routes.user_routes import routes as user_routes
 from database_handler.db_connector import db_connector
+from fastapi import FastAPI, Depends, status, BackgroundTasks
 from exceptions.exceptions import Invalid_Redirection_Request
-from middleware import X_Process_Time_Middleware, RateLimitingMiddleware
+from middleware import Information_Middleware, RateLimitingMiddleware
 from database_handler.crud import get_original_url, increment_hit_count
+from database_handler.schemas import get_homepage_response, Homepage_Response
 
 app = FastAPI()
 logger.log("FastAPI app initialized")
@@ -31,7 +31,7 @@ MAX_AGE_CORS_CACHE = int(os.getenv("MAX_AGE_CORS_CACHE"))
 GZIP_MINIMUM_SIZE = int(os.getenv("GZIP_MINIMUM_SIZE"))
 
 # app.add_middleware(RateLimitingMiddleware)
-app.add_middleware(X_Process_Time_Middleware)
+app.add_middleware(Information_Middleware)
 app.add_middleware(CORSMiddleware, allow_origins=ORIGINS, allow_credentials=True, allow_methods=["*"], allow_headers=["*"], max_age=MAX_AGE_CORS_CACHE,)
 app.add_middleware(GZipMiddleware, minimum_size=GZIP_MINIMUM_SIZE)
 
@@ -43,13 +43,14 @@ except Exception as e:
 
 # Routes
 @app.get("/", tags=["test"], status_code=status.HTTP_200_OK, summary="Home Page", response_description="Welcome message")
-def home() -> Union[dict, str]:
-    content = {
-        "message": "Welcome to the URL Shortener API!",
-        "hostname": socket.gethostname()
-    }
+def home() -> Union[Homepage_Response, str]:
+    """This function is used to return the welcome message.
+
+    Returns:
+        Union[dict, str]: message, hostname
+    """
     logger.log(f"Home Page Accessed by {socket.gethostname()}")
-    return content
+    return get_homepage_response(hostname= socket.gethostname())
 
 @app.get("/{short_url}", tags=["redirection"], status_code=status.HTTP_301_MOVED_PERMANENTLY, summary="Redirects to the original URL", response_description="Redirect response to the original URL")
 def redirect_short_url(background_tasks: BackgroundTasks, short_url: str , db: Session = Depends(db_connector.get_db)):

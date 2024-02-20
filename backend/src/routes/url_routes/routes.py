@@ -1,14 +1,16 @@
+from typing import Union
 from logger import logger
 from auth import auth_handler
 from utils import send_response
-from typing import Union
 from sqlalchemy.orm import Session
-from fastapi import APIRouter, Depends, Body, status
+from constants import USER_EMAIL_KEY
 from exceptions.exceptions import Invalid_User
+from fastapi import APIRouter, Depends, Body, status
 from database_handler.db_connector import db_connector
-from constants import USER_EMAIL_KEY, URLS_KEY
 from database_handler.crud import create_short_url, delete_url, edit_long_url, get_user_profile_content
-from database_handler.schemas import MESSAGE_RESPONSE, LONG_URL_DELETE_REQUEST, LONG_URL_CREATE_RESPONSE, LONG_URL_CREATE_REQUEST, LONG_URL_EDIT_REQUEST, LONG_URL_EDIT_RESPONSE, LONG_URL_DELETE_RESPONSE
+from database_handler.schemas import Long_URL_Edit_Request, Long_URL_Edit_Response, Long_URL_Delete_Request
+from database_handler.schemas import Long_URL_Create_Request, Long_URL_Create_Response, Long_URL_Delete_Response
+from database_handler.schemas import get_long_url_create_response, get_long_url_edit_response, get_long_url_delete_response
 
 router = APIRouter(
     prefix="/url",
@@ -16,7 +18,7 @@ router = APIRouter(
 )
 
 @router.post("/create_url", status_code=status.HTTP_201_CREATED, summary="Create a new url", response_description="Shortened URL")
-async def add_url(long_url_create_request: LONG_URL_CREATE_REQUEST  = Body(default=None) ,  db: Session = Depends(db_connector.get_db), token: str = Depends(auth_handler._O2AUTH2_SCHEME)) -> Union[LONG_URL_CREATE_RESPONSE, dict]:
+async def add_url(long_url_create_request: Long_URL_Create_Request  = Body(default=None) ,  db: Session = Depends(db_connector.get_db), token: str = Depends(auth_handler._O2AUTH2_SCHEME)) -> Union[Long_URL_Create_Response, str]:
     """This api endpoint is used to create new urls. User must be logged in. 
 
     Args:
@@ -36,14 +38,14 @@ async def add_url(long_url_create_request: LONG_URL_CREATE_REQUEST  = Body(defau
         
         content = get_user_profile_content(db, user)
 
-        return LONG_URL_CREATE_RESPONSE(short_url=short_url, long_url=long_url_create_request.long_url, urls=content.get(URLS_KEY)).dict()
+        return get_long_url_create_response(short_url=short_url, long_url=long_url_create_request.long_url, urls=content)
     except Invalid_User as e:
         return send_response(content=e, status_code=status.HTTP_401_UNAUTHORIZED, error_tag=True)
     except Exception as e:
         return send_response(content=e, status_code=status.HTTP_400_BAD_REQUEST, error_tag=True)
     
 @router.put("/edit_url", status_code=status.HTTP_200_OK, summary="Edit a url", response_description="Success message")
-async def edit_url(long_url_edit_request: LONG_URL_EDIT_REQUEST, db: Session = Depends(db_connector.get_db), token: str = Depends(auth_handler._O2AUTH2_SCHEME)) -> Union[LONG_URL_EDIT_RESPONSE, dict]:
+async def edit_url(long_url_edit_request: Long_URL_Edit_Request, db: Session = Depends(db_connector.get_db), token: str = Depends(auth_handler._O2AUTH2_SCHEME)) -> Union[Long_URL_Edit_Response, str]:
     """This api endpoint is used to edit created short urls. User must be logged in.
 
     Args:
@@ -60,15 +62,14 @@ async def edit_url(long_url_edit_request: LONG_URL_EDIT_REQUEST, db: Session = D
         
         content = get_user_profile_content(db, user)
 
-        return LONG_URL_EDIT_RESPONSE(entry_id=long_url_edit_request.entry_id, new_long_url=long_url_edit_request.new_long_url, old_long_url=long_url_edit_request.old_long_url, urls=content.get(URLS_KEY)).dict()
+        return get_long_url_edit_response(urls=content)
     except Invalid_User as e:
         return send_response(content=e, status_code=status.HTTP_401_UNAUTHORIZED, error_tag=True)
     except Exception as e:
         return send_response(content=e, status_code=status.HTTP_400_BAD_REQUEST, error_tag=True)
-        
 
 @router.put("/delete_url", status_code=status.HTTP_200_OK, summary="Delete a url", response_description="Success message")
-async def delete_long_url(long_url_delete_request: LONG_URL_DELETE_REQUEST = Body(default=None), db: Session = Depends(db_connector.get_db), token: str = Depends(auth_handler._O2AUTH2_SCHEME)) -> Union[MESSAGE_RESPONSE, dict]:
+async def delete_long_url(long_url_delete_request: Long_URL_Delete_Request = Body(default=None), db: Session = Depends(db_connector.get_db), token: str = Depends(auth_handler._O2AUTH2_SCHEME)) -> Union[Long_URL_Delete_Response, str]:
     """This api endpoint is used to delete created short urls. User must be logged in.
 
     Args:
@@ -84,7 +85,7 @@ async def delete_long_url(long_url_delete_request: LONG_URL_DELETE_REQUEST = Bod
         logger.log(f"SUCCESSFUL: Short URL Deleted", error_tag=False)
         
         content = get_user_profile_content(db, user)
-        return LONG_URL_DELETE_RESPONSE(urls = content.get(URLS_KEY)).dict()
+        return get_long_url_delete_response(urls=content)
     except Invalid_User as e:
         return send_response(content=e, status_code=status.HTTP_401_UNAUTHORIZED, error_tag=True)
     except Exception as e:
