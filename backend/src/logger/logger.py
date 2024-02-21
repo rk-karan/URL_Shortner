@@ -44,7 +44,7 @@ class _logger:
     def get_logger(self):
         return self.logger
     
-    def log(self, message, error_tag=False):
+    def log(self, message=None, error_tag=False):
         
         try:
             if not error_tag:
@@ -66,7 +66,7 @@ class _logger:
             print(message.encode('utf-8', errors='ignore'))
             pass
         except Exception as e:
-            print("Some Error Occurred.")
+            print(f"Some Error Occurred. {e}")
             pass
         
         sys.stdout.flush()

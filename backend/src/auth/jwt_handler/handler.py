@@ -8,8 +8,8 @@ from datetime import datetime, timedelta
 from passlib.context import CryptContext
 
 from logger import logger
-from constants import PAYLOAD_USER_KEY, PAYLOAD_EXPIRY_KEY, DATE_TIME_FORMAT
 from exceptions.exceptions import Invalid_User, Missing_Params
+from constants import PAYLOAD_USER_KEY, PAYLOAD_EXPIRY_KEY, DATE_TIME_FORMAT
 from ..OAuth2.OAuth2PasswordBearerWithCookie import OAuth2PasswordBearerWithCookie
 
 # Load Environment Variables
@@ -140,7 +140,7 @@ class JWT_Handler:
             payload = self.verify_token(token)
             return payload.get(PAYLOAD_USER_KEY)
         except Exception as e:
-            raise Invalid_User(e)
+            raise Invalid_User
 
 # Initialize the JWT Handler
 auth_handler = JWT_Handler()

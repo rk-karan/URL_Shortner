@@ -3,7 +3,6 @@ from fastapi.security import OAuth2
 from fastapi import status, Request, HTTPException
 from fastapi.openapi.models import OAuthFlows as OAuthFlowsModel
 from fastapi.security.utils import get_authorization_scheme_param
-
 from constants import ACCESS_TOKEN_KEY, AUTHORIZATION_SCHEME, INVALID_USER_MESSAGE
 
 class OAuth2PasswordBearerWithCookie(OAuth2):

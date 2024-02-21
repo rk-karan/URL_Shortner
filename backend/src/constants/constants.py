@@ -38,6 +38,8 @@ DELETE_USER_SUCCESS_MESSAGE = "User deleted successfully"
 # User profile update success message. Generally occurs when the user profile is updated successfully.
 CHANGE_PASSWORD_SUCCESS_MESSAGE = "Password changed successfully"
 
+VALIDATE_TOKEN_SUCCESS_MESSAGE = "Token validated"
+
 ## URL CRUD messages
 
 # URL create success message. Generally occurs when the URL is created successfully.
@@ -51,6 +53,12 @@ EDIT_URL_SUCCESS_MESSAGE = "URL edited successfully"
 
 # URL already exists message. Generally occurs when the URL already exists in the database.
 URL_CREATE_URL_ALREADY_EXISTS = "URL already exists"
+
+## Homepage message
+
+# Homepage message. Generally occurs when the user hits the homepage.
+HOME_PAGE_MESSAGE = "Welcome to the URL Shortener APIs"
+
 
 ## Authorization constants
 
@@ -92,6 +100,19 @@ USER_PASSWORD_KEY = "password"
 # Key to access urls
 URLS_KEY = "urls"
 
+# Key to access X-Process-Time in response headers
+X_PROCESS_TIME_KEY = "X-Process-Time"
+
+## JSON Response constants
+
+# JSON response indent
+JSON_RESPONSE_INDENT = 4
+
+# JSON response sort keys
+JSON_RESPONSE_SORT_KEYS = True
+
+# JSON response default
+JSON_RESPONSE_DEFAULT = str
 
 ## Domain name
 DOMAIN_NAME = "http://localhost:8000"
@@ -111,6 +132,3 @@ NULL_ENTRY_IN_URLS_MAPPING = {
 
 ## Date time format
 DATE_TIME_FORMAT = "%Y-%m-%d %H:%M:%S.%f"
-
-# Key to access X-Process-Time in response headers
-X_PROCESS_TIME_KEY = "X-Process-Time"
