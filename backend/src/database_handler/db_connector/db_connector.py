@@ -2,7 +2,6 @@
     This file contains the DB_Connector class which is used to connect to the database and get the db object.
     The db session object is used to perform CRUD operations on the database.
 """
-
 import os
 from dotenv import load_dotenv
 from sqlalchemy import create_engine, MetaData

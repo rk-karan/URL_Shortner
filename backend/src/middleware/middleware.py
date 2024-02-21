@@ -1,10 +1,12 @@
 import os
-from fastapi import Request, HTTPException, status
-from constants import X_PROCESS_TIME_KEY
+from logger import logger
 from dotenv import load_dotenv
 from utils import get_processing_time
-from starlette.middleware.base import BaseHTTPMiddleware
+from constants import X_PROCESS_TIME_KEY
 from datetime import datetime, timedelta
+from exceptions.exceptions import Missing_Params
+from fastapi import Request, HTTPException, status
+from starlette.middleware.base import BaseHTTPMiddleware
 
 env_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'config', '.env')
 load_dotenv(dotenv_path=env_path)
@@ -12,12 +14,26 @@ load_dotenv(dotenv_path=env_path)
 RATE_LIMIT_DURATION_MINUTES = os.getenv("RATE_LIMIT_DURATION_MINUTES")
 RATE_LIMIT_REQUESTS_COUNT = os.getenv("RATE_LIMIT_REQUESTS_COUNT")
 
-class X_Process_Time_Middleware(BaseHTTPMiddleware):
-    async def dispatch(self, request: Request, call_next):
-        start_time = datetime.utcnow()
-        response = await call_next(request)
-        response.headers[X_PROCESS_TIME_KEY] = get_processing_time(start_time)
-        return response
+def print_request_headers_cookies(request_headers: dict):
+    if not request_headers:
+        raise Missing_Params
+    
+    logger.log("Headers:")
+    for key, value in request_headers.items():
+        logger.log(f"{key} : {value}")
+
+def print_request_info(request: Request = None):
+    
+    try:
+        if not request:
+            raise Missing_Params
+        
+        logger.log(f"SUCCESSFUL: Request received. \nRequest URL: {request.url}  \nRequest Client: {request.client} \nMethod: {request.method}")
+        print_request_headers_cookies(request.headers)
+        print_request_headers_cookies(request.cookies)
+    except Exception as e:
+        logger.log(f"Error printing request info {e}", error_tag=True)
+        pass
 
 class RateLimitingMiddleware(BaseHTTPMiddleware):
 
@@ -45,4 +61,15 @@ class RateLimitingMiddleware(BaseHTTPMiddleware):
         self._request_counts[client_ip] = (request_count, datetime.now())
 
         response = await call_next(request)
+        return response
+
+class Information_Middleware(BaseHTTPMiddleware):
+    async def dispatch(self, request: Request, call_next):
+        start_time = datetime.utcnow()
+        print_request_info(request=request)
+        
+        response = await call_next(request)
+        
+        response.headers[X_PROCESS_TIME_KEY] = get_processing_time(start_time)
+        logger.log(f"SUCCESSFUL: Request: {request.url} served in {response.headers[X_PROCESS_TIME_KEY]}")
         return response

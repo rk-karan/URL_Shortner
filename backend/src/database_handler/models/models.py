@@ -14,10 +14,6 @@ class URLS_Mapping(Base):
     created_on = Column(DateTime, default= func.now())
     edited_on = Column(DateTime, default= func.now())
     hit_count = Column(Integer, default=0)
-    
-    __table_args__ = (
-        UniqueConstraint('long_url', 'email', name='unique_long_url_per_email'),
-    )
 
 class USERS(Base):
     __tablename__ = 'users'
