@@ -27,7 +27,7 @@ const DeleteModal = ({url})=> {
   const handleYes = async(e) => {
     e.preventDefault(e);
     try{
-      const res = await deleteURL({"entry_id": url.id , "long_url": url.long_url});
+      const res = await deleteURL({"id": url.id , "long_url": url.long_url});
       if(res.status === 200){
         const userReq = await getUser();
         if(userReq.status === 200){

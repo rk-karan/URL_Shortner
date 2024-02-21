@@ -50,7 +50,7 @@ export const UpdateModal = ({url}) => {
             return;
         }else{
             try{
-                const res = await updateURL({"new_long_url": newURLRef.current.value , "old_long_url": url.long_url , "entry_id": url.id});
+                const res = await updateURL({"new_long_url": newURLRef.current.value , "old_long_url": url.long_url , "id": url.id});
                 console.log(res);
                 if(res.status === 200){
                     const userReq = await getUser();
