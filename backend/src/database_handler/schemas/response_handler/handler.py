@@ -31,10 +31,10 @@ def get_login_response(access_token: str = None):
 def get_user_create_response():
     return make_response(User_Create_Response())
 
-def get_user_profile_response(name: str = None, email: str = None, urls =[], access_token: str = None):
-    if not name or not email or not access_token:
+def get_user_profile_response(name: str = None, email: str = None, urls =[]):
+    if not name or not email:
         raise Missing_Params
-    return make_response(User_Profile_Response(user= get_user_details(name= name, email= email), urls=urls, urls_count= len(urls), access_token= access_token))
+    return make_response(User_Profile_Response(user= get_user_details(name= name, email= email), urls=urls, urls_count= len(urls)))
 
 def get_user_password_update_response():
     return make_response(User_Password_Update_Response())
