@@ -95,7 +95,7 @@ async def get_user_me(background_tasks: BackgroundTasks, db: Session = Depends(d
         background_tasks.add_task(logger.log, message=f"User: {user.get(USER_EMAIL_KEY)}, urls retrieved")
         # logger.log(f"SUCCESSFUL: Content: {content}, urls retrieved", error_tag=False)
 
-        return get_user_profile_response(name= user.get(USER_NAME_KEY), email=user.get(USER_EMAIL_KEY), urls=content, access_token=token)
+        return get_user_profile_response(name= user.get(USER_NAME_KEY), email=user.get(USER_EMAIL_KEY), urls=content)
     except Invalid_User as e:
         return send_response(content=e, status_code=status.HTTP_401_UNAUTHORIZED, error_tag=True)
     except Exception as e:

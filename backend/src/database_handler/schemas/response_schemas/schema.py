@@ -2,7 +2,7 @@ from pydantic import BaseModel, Field
 from ..user_schemas.schema import User_Information
 from ..url_schemas.schema import URLS_Details, _Short_URL
 from constants import CREATE_URL_SUCCESS_MESSAGE, EDIT_URL_SUCCESS_MESSAGE
-from constants import  DELETE_URL_SUCCESS_MESSAGE, LOGIN_SUCCESS_MESSAGE, SIGNUP_SUCCESS_MESSAGE
+from constants import  DELETE_URL_SUCCESS_MESSAGE, LOGIN_SUCCESS_MESSAGE, SIGNUP_SUCCESS_MESSAGE, USER_PROFILE_INFORMATION_MESSAGE
 from constants import HOME_PAGE_MESSAGE, CHANGE_PASSWORD_SUCCESS_MESSAGE, DELETE_USER_SUCCESS_MESSAGE, LOGOUT_SUCCESS_MESSAGE, VALIDATE_TOKEN_SUCCESS_MESSAGE
 
 class _Access_Token(BaseModel):
@@ -27,7 +27,8 @@ class User_Create_Response(_Message_Response):
 class User_Password_Update_Response(_Message_Response):
     message : str = Field(default = CHANGE_PASSWORD_SUCCESS_MESSAGE)
 
-class User_Profile_Response(User_Information, URLS_Details, _Message_Response, _Access_Token):
+class User_Profile_Response(User_Information, URLS_Details, _Message_Response):
+    message : str = Field(default = USER_PROFILE_INFORMATION_MESSAGE)
     urls_count: int = Field(default = 0, title = "Count of the urls", description = "The count of the urls should be an integer")
 
 class User_Delete_Response(_Message_Response):

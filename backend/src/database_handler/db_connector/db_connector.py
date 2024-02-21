@@ -19,7 +19,7 @@ DB_USERNAME = os.getenv("DB_USERNAME")
 DB_PASSWORD = os.getenv("DB_PASSWORD")
 
 class DB_Connector:
-    def __init__(self):
+    def __init__(self, DB_URL=DB_URL, DB_NAME=DB_NAME, DB_USERNAME=DB_USERNAME, DB_PASSWORD=DB_PASSWORD, logger=logger):
         """
         Initializes the DB_Connector class.
 
