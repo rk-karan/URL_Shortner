@@ -44,7 +44,7 @@ class _logger:
     def get_logger(self):
         return self.logger
     
-    def log(self, message, error_tag=False):
+    def log(self, message=None, error_tag=False):
         
         try:
             if not error_tag:

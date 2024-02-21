@@ -13,9 +13,6 @@ class _Long_URL(BaseModel):
 class _Short_URL(BaseModel):
     short_url: str = Field(default=None, title = "Short URL", description = "The short URL should be a string")
 
-class _Entry_Id(BaseModel):
-    entry_id: int = Field(default=None, title = "id of the Long_URL", description = "The id of the long url should be an integer")
-
 class _New_Long_URL(BaseModel):
     new_long_url: str = Field(default=None, title = "New Long URL", description = "The new long URL should be a string")
 
@@ -34,10 +31,10 @@ class _Edited_On(BaseModel):
 class Long_URL_Create_Request(_Long_URL):
     pass
 
-class Long_URL_Edit_Request(_New_Long_URL, _Old_Long_URL, _Entry_Id):
+class Long_URL_Edit_Request(_New_Long_URL, _Old_Long_URL, _id):
     pass
 
-class Long_URL_Delete_Request(_Long_URL, _Entry_Id):
+class Long_URL_Delete_Request(_Long_URL, _id):
     pass
 
 class _URL_Details(_id, _Long_URL, _Short_URL, _Hit_Count, _Created_On, _Edited_On):

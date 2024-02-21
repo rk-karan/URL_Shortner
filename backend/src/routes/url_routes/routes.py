@@ -5,8 +5,8 @@ from utils import send_response
 from sqlalchemy.orm import Session
 from constants import USER_EMAIL_KEY
 from exceptions.exceptions import Invalid_User
-from fastapi import APIRouter, Depends, Body, status
 from database_handler.db_connector import db_connector
+from fastapi import APIRouter, Depends, Body, status, BackgroundTasks
 from database_handler.crud import create_short_url, delete_url, edit_long_url, get_user_profile_content
 from database_handler.schemas import Long_URL_Edit_Request, Long_URL_Edit_Response, Long_URL_Delete_Request
 from database_handler.schemas import Long_URL_Create_Request, Long_URL_Create_Response, Long_URL_Delete_Response
@@ -18,7 +18,7 @@ router = APIRouter(
 )
 
 @router.post("/create_url", status_code=status.HTTP_201_CREATED, summary="Create a new url", response_description="Shortened URL")
-async def add_url(long_url_create_request: Long_URL_Create_Request  = Body(default=None) ,  db: Session = Depends(db_connector.get_db), token: str = Depends(auth_handler._O2AUTH2_SCHEME)) -> Union[Long_URL_Create_Response, str]:
+async def add_url(background_tasks: BackgroundTasks, long_url_create_request: Long_URL_Create_Request  = Body(default=None) ,  db: Session = Depends(db_connector.get_db), token: str = Depends(auth_handler._O2AUTH2_SCHEME)) -> Union[Long_URL_Create_Response, str]:
     """This api endpoint is used to create new urls. User must be logged in. 
 
     Args:
@@ -31,10 +31,12 @@ async def add_url(long_url_create_request: Long_URL_Create_Request  = Body(defau
     """
     try:
         user = auth_handler.get_current_user(token)
-        logger.log(f"User: {user.get(USER_EMAIL_KEY)}", error_tag=False)
+        background_tasks.add_task(logger.log, message=f"User: {user.get(USER_EMAIL_KEY)}")
+        # logger.log(f"User: {user.get(USER_EMAIL_KEY)}", error_tag=False)
          
         short_url = create_short_url(db, long_url = long_url_create_request.long_url, email = user.get(USER_EMAIL_KEY))
-        logger.log(f"SUCCESSFUL: Short URL: {short_url}, created", error_tag=False)
+        background_tasks.add_task(logger.log, message=f"SUCCESSFUL: Short URL: {short_url}, created")
+        # logger.log(f"SUCCESSFUL: Short URL: {short_url}, created", error_tag=False)
         
         content = get_user_profile_content(db, user)
 
@@ -45,7 +47,7 @@ async def add_url(long_url_create_request: Long_URL_Create_Request  = Body(defau
         return send_response(content=e, status_code=status.HTTP_400_BAD_REQUEST, error_tag=True)
     
 @router.put("/edit_url", status_code=status.HTTP_200_OK, summary="Edit a url", response_description="Success message")
-async def edit_url(long_url_edit_request: Long_URL_Edit_Request, db: Session = Depends(db_connector.get_db), token: str = Depends(auth_handler._O2AUTH2_SCHEME)) -> Union[Long_URL_Edit_Response, str]:
+async def edit_url(background_tasks: BackgroundTasks, long_url_edit_request: Long_URL_Edit_Request, db: Session = Depends(db_connector.get_db), token: str = Depends(auth_handler._O2AUTH2_SCHEME)) -> Union[Long_URL_Edit_Response, str]:
     """This api endpoint is used to edit created short urls. User must be logged in.
 
     Args:
@@ -55,10 +57,12 @@ async def edit_url(long_url_edit_request: Long_URL_Edit_Request, db: Session = D
     """
     try:
         user = auth_handler.get_current_user(token)
-        logger.log(f"User: {user.get(USER_EMAIL_KEY)}", error_tag=False)
+        background_tasks.add_task(logger.log, message=f"User: {user.get(USER_EMAIL_KEY)}")
+        # logger.log(f"User: {user.get(USER_EMAIL_KEY)}", error_tag=False)
         
-        edit_long_url(db, new_long_url=long_url_edit_request.new_long_url, old_long_url=long_url_edit_request.old_long_url, entry_id=int(long_url_edit_request.entry_id), email=user.get(USER_EMAIL_KEY))
-        logger.log(f"SUCCESSFUL: Short URL Edited", error_tag=False)
+        edit_long_url(db, new_long_url=long_url_edit_request.new_long_url, old_long_url=long_url_edit_request.old_long_url, entry_id=int(long_url_edit_request.id), email=user.get(USER_EMAIL_KEY))
+        background_tasks.add_task(logger.log, message=f"SUCCESSFUL: Short URL Edited")
+        # logger.log(f"SUCCESSFUL: Short URL Edited", error_tag=False)
         
         content = get_user_profile_content(db, user)
 
@@ -69,7 +73,7 @@ async def edit_url(long_url_edit_request: Long_URL_Edit_Request, db: Session = D
         return send_response(content=e, status_code=status.HTTP_400_BAD_REQUEST, error_tag=True)
 
 @router.put("/delete_url", status_code=status.HTTP_200_OK, summary="Delete a url", response_description="Success message")
-async def delete_long_url(long_url_delete_request: Long_URL_Delete_Request = Body(default=None), db: Session = Depends(db_connector.get_db), token: str = Depends(auth_handler._O2AUTH2_SCHEME)) -> Union[Long_URL_Delete_Response, str]:
+async def delete_long_url(background_tasks: BackgroundTasks, long_url_delete_request: Long_URL_Delete_Request = Body(default=None), db: Session = Depends(db_connector.get_db), token: str = Depends(auth_handler._O2AUTH2_SCHEME)) -> Union[Long_URL_Delete_Response, str]:
     """This api endpoint is used to delete created short urls. User must be logged in.
 
     Args:
@@ -79,12 +83,16 @@ async def delete_long_url(long_url_delete_request: Long_URL_Delete_Request = Bod
     """
     try:
         user = auth_handler.get_current_user(token)
-        logger.log(f"User: {user.get(USER_EMAIL_KEY)}", error_tag=False)
+        background_tasks.add_task(logger.log, message=f"User: {user.get(USER_EMAIL_KEY)}")
+        # logger.log(f"User: {user.get(USER_EMAIL_KEY)}", error_tag=False)
         
-        delete_url(db , entry_id=int(long_url_delete_request.entry_id),long_url=long_url_delete_request.long_url, email=user.get(USER_EMAIL_KEY))
-        logger.log(f"SUCCESSFUL: Short URL Deleted", error_tag=False)
+        delete_url(db , entry_id=int(long_url_delete_request.id),long_url=long_url_delete_request.long_url, email=user.get(USER_EMAIL_KEY))
+        background_tasks.add_task(logger.log, message=f"SUCCESSFUL: Short URL Deleted")
+        # logger.log(f"SUCCESSFUL: Short URL Deleted", error_tag=False)
         
         content = get_user_profile_content(db, user)
+        background_tasks.add_task(logger.log, message=f"Sending content: {content}")
+        
         return get_long_url_delete_response(urls=content)
     except Invalid_User as e:
         return send_response(content=e, status_code=status.HTTP_401_UNAUTHORIZED, error_tag=True)

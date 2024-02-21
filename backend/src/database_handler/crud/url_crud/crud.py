@@ -17,14 +17,14 @@ load_dotenv(dotenv_path=env_path)
 
 URL_CREATE_MAX_LIMIT = os.getenv("URL_CREATE_MAX_LIMIT")
 
-def get_short_url(domain_name: str = DOMAIN_NAME, _id: int = None):
+def get_short_url(domain_name: str = DOMAIN_NAME, entry_id: int = None):
     
-    if not _id:
+    if not entry_id:
         raise Missing_Params
     
-    return f"{domain_name}/{_id}"
+    return f"{domain_name}/{entry_id}"
 
-async def increment_hit_count(db: Session, _id: int):
+async def increment_hit_count(db: Session, entry_id: int):
     """This function is used to increment the hit count of the URL.
 
     Args:
@@ -32,17 +32,17 @@ async def increment_hit_count(db: Session, _id: int):
         _id (int): ID of the URL
     """
     try:
-        logger.log(f"Incrementing hit count for URL with ID: {_id}")
-        if not _id:
+        logger.log(f"Incrementing hit count for URL with ID: {entry_id}")
+        if not entry_id:
             raise Missing_Params
         
-        existing_url = db.query(URLS_Mapping).filter_by(id=_id).first()
+        existing_url = db.query(URLS_Mapping).filter_by(id=entry_id).first()
         
         if existing_url:
             existing_url.hit_count = existing_url.hit_count+1
             db.commit()
             
-            logger.log(f"SUCCESSFUL: Hit count incremented for URL with ID: {_id}")
+            logger.log(f"SUCCESSFUL: Hit count incremented for URL with ID: {entry_id}")
             return
         
         raise Not_Found
@@ -69,7 +69,7 @@ def create_short_url(db: Session , long_url: str, email: str):
 
         existing_url = db.query(URLS_Mapping).filter_by(email=NULL_ENTRY_IN_URLS_MAPPING.get(USER_EMAIL_KEY), long_url=NULL_ENTRY_IN_URLS_MAPPING.get(LONG_URL_KEY)).first()
         short_url = None
-        _id =  None
+        entry_id =  None
         
         if existing_url:
             existing_url.email = email
@@ -79,15 +79,15 @@ def create_short_url(db: Session , long_url: str, email: str):
             existing_url.hit_count = NULL_INTEGER
             
             db.commit()
-            _id = decimal_to_base62(existing_url.id)
+            entry_id = decimal_to_base62(existing_url.id)
         else:
             url_obj = URLS_Mapping(long_url=long_url, email=email)
             db.add(url_obj)
             db.commit()
             db.refresh(url_obj)
-            _id = decimal_to_base62(url_obj.id)
+            entry_id = decimal_to_base62(url_obj.id)
         
-        short_url = get_short_url(_id=_id)
+        short_url = get_short_url(entry_id=entry_id)
         return short_url
     
     except IntegrityError as e:
@@ -109,13 +109,13 @@ def get_original_url(db: Session, short_url: str):
         if not short_url:
             raise Missing_Params
         
-        _id = base62_to_decimal(short_url)
-        item = db.query(URLS_Mapping).filter(URLS_Mapping.id == _id).first()
+        entry_id = base62_to_decimal(short_url)
+        item = db.query(URLS_Mapping).filter(URLS_Mapping.id == entry_id).first()
         
         if item is None:
             raise Not_Found
 
-        return (item.long_url, _id)
+        return (item.long_url, entry_id)
     except Exception as e:
         raise e
 

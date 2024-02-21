@@ -73,7 +73,7 @@ def login_user(db: Session, email: str, password: str):
         
         
         if auth_handler.verify_password(password, stored_user.hashed_password):
-            return (auth_handler.create_access_token(payload = get_payload_decoded(name= stored_user.name, email= stored_user.email)), stored_user.name)
+            return auth_handler.create_access_token(payload = get_payload_decoded(name= stored_user.name, email= stored_user.email))
         
         raise Invalid_User
        

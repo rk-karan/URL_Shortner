@@ -32,7 +32,7 @@ GZIP_MINIMUM_SIZE = int(os.getenv("GZIP_MINIMUM_SIZE"))
 
 # app.add_middleware(RateLimitingMiddleware)
 app.add_middleware(Information_Middleware)
-app.add_middleware(CORSMiddleware, allow_origins=ORIGINS, allow_credentials=True, allow_methods=["*"], allow_headers=["*"], max_age=MAX_AGE_CORS_CACHE,)
+app.add_middleware(CORSMiddleware, allow_origins=ORIGINS, allow_credentials=True, allow_methods=["*"], allow_headers=["*"], max_age=MAX_AGE_CORS_CACHE)
 app.add_middleware(GZipMiddleware, minimum_size=GZIP_MINIMUM_SIZE)
 
 try:
@@ -43,25 +43,27 @@ except Exception as e:
 
 # Routes
 @app.get("/", tags=["test"], status_code=status.HTTP_200_OK, summary="Home Page", response_description="Welcome message")
-def home() -> Union[Homepage_Response, str]:
+def home(background_tasks: BackgroundTasks) -> Union[Homepage_Response, str]:
     """This function is used to return the welcome message.
 
     Returns:
         Union[dict, str]: message, hostname
     """
-    logger.log(f"Home Page Accessed by {socket.gethostname()}")
+    background_tasks.add_task(logger.log, message=f"Home Page Accessed by {socket.gethostname()}")
+    # logger.log(f"Home Page Accessed by {socket.gethostname()}")
     return get_homepage_response(hostname= socket.gethostname())
 
 @app.get("/{short_url}", tags=["redirection"], status_code=status.HTTP_301_MOVED_PERMANENTLY, summary="Redirects to the original URL", response_description="Redirect response to the original URL")
 def redirect_short_url(background_tasks: BackgroundTasks, short_url: str , db: Session = Depends(db_connector.get_db)):
     try:
         original_url, _id = get_original_url(db=db , short_url=short_url)
-        logger.log(f"Redirecting from {short_url} to {original_url}")
+        background_tasks.add_task(logger.log, message=f"Redirecting from {short_url} to {original_url}")
+        # logger.log(f"Redirecting from {short_url} to {original_url}")
         
         if not original_url:
             raise Invalid_Redirection_Request
 
-        background_tasks.add_task(increment_hit_count, db=db, _id=_id)
+        background_tasks.add_task(increment_hit_count, db=db, entry_id=_id)
         return RedirectResponse(url = original_url)
     except Exception as e:
         return send_response(content={e}, status_code=status.HTTP_400_BAD_REQUEST, error_tag=True)
