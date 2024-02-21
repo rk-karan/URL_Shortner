@@ -40,6 +40,8 @@ CHANGE_PASSWORD_SUCCESS_MESSAGE = "Password changed successfully"
 
 VALIDATE_TOKEN_SUCCESS_MESSAGE = "Token validated"
 
+USER_PROFILE_INFORMATION_MESSAGE = "Successfully fetched user profile"
+
 ## URL CRUD messages
 
 # URL create success message. Generally occurs when the URL is created successfully.
