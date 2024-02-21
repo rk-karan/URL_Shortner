@@ -4,7 +4,7 @@ from ..user_schemas.schema import User_Details
 from exceptions.exceptions import Missing_Params
 from ..response_schemas.schema import User_Password_Update_Response, Homepage_Response
 from constants import JSON_RESPONSE_INDENT, JSON_RESPONSE_SORT_KEYS, JSON_RESPONSE_DEFAULT
-from ..response_schemas.schema import User_Login_Response, User_Create_Response, Payload_Decoded, User_Logout_Response
+from ..response_schemas.schema import User_Login_Response, User_Create_Response, Payload_Decoded, User_Logout_Response, Long_URL_Delete_Response
 from ..response_schemas.schema import User_Profile_Response, Long_URL_Create_Response, Long_URL_Edit_Response, User_Validate_Token_Response, User_Delete_Response
 
 def make_response(item = None):
@@ -54,14 +54,10 @@ def get_long_url_create_response(short_url: str = None, long_url: str = None, ur
     return make_response(Long_URL_Create_Response(short_url= short_url, long_url= long_url, urls=urls))
 
 def get_long_url_edit_response(urls = []):
-    if not urls:
-        raise Missing_Params
     return make_response(Long_URL_Edit_Response(urls=urls))
 
 def get_long_url_delete_response(urls = []):
-    if not urls:
-        raise Missing_Params
-    return make_response(Long_URL_Edit_Response(urls=urls))
+    return make_response(Long_URL_Delete_Response(urls=urls))
 
 def get_homepage_response(hostname: str = None):
     if not hostname:
