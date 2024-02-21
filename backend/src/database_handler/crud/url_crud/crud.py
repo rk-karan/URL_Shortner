@@ -5,7 +5,6 @@ from logger import logger
 from datetime import datetime
 from dotenv import load_dotenv
 from sqlalchemy.orm import Session
-from sqlalchemy.exc import IntegrityError
 from database_handler.models import URLS_Mapping
 from base62conversions.base62conversions import decimal_to_base62 , base62_to_decimal
 from exceptions.exceptions import Not_Found, Missing_Params, URL_Create_Limit_Reached, URL_Create_URL_Already_Exists
@@ -66,6 +65,9 @@ def create_short_url(db: Session , long_url: str, email: str):
         
         if db.query(URLS_Mapping).filter(URLS_Mapping.email == email).count() >= int(URL_CREATE_MAX_LIMIT):
             raise URL_Create_Limit_Reached
+        
+        if db.query(URLS_Mapping).filter(URLS_Mapping.long_url == long_url and URLS_Mapping.email==email).count() > 0:
+            raise URL_Create_URL_Already_Exists
 
         existing_url = db.query(URLS_Mapping).filter_by(email=NULL_ENTRY_IN_URLS_MAPPING.get(USER_EMAIL_KEY), long_url=NULL_ENTRY_IN_URLS_MAPPING.get(LONG_URL_KEY)).first()
         short_url = None
@@ -89,9 +91,7 @@ def create_short_url(db: Session , long_url: str, email: str):
         
         short_url = get_short_url(entry_id=entry_id)
         return short_url
-    
-    except IntegrityError as e:
-        raise URL_Create_URL_Already_Exists
+
     except Exception as e:
         raise e
 

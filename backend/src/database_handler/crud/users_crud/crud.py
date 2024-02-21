@@ -45,7 +45,7 @@ def add_user(db: Session, email: str, password: str, name: str):
         db.add(new_entry)
         db.commit()
         db.refresh(new_entry)
-        
+
     except Exception as e:
         raise e
 

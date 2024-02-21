@@ -66,7 +66,7 @@ class _logger:
             print(message.encode('utf-8', errors='ignore'))
             pass
         except Exception as e:
-            print("Some Error Occurred.")
+            print(f"Some Error Occurred. {e}")
             pass
         
         sys.stdout.flush()

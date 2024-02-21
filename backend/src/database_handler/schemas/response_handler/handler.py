@@ -28,10 +28,8 @@ def get_login_response(access_token: str = None):
         raise Missing_Params
     return make_response(User_Login_Response(access_token= access_token))
 
-def get_user_create_response(name: str = None, email: str = None):
-    if not name or not email:
-        raise Missing_Params
-    return make_response(User_Create_Response(user= get_user_details(name= name, email= email)))
+def get_user_create_response():
+    return make_response(User_Create_Response())
 
 def get_user_profile_response(name: str = None, email: str = None, urls =[], access_token: str = None):
     if not name or not email or not access_token:
