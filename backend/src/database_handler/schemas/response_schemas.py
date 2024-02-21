@@ -1,9 +1,9 @@
 from pydantic import BaseModel, Field
-from ..user_schemas.schema import User_Information
-from ..url_schemas.schema import URLS_Details, _Short_URL
-from constants import CREATE_URL_SUCCESS_MESSAGE, EDIT_URL_SUCCESS_MESSAGE
-from constants import  DELETE_URL_SUCCESS_MESSAGE, LOGIN_SUCCESS_MESSAGE, SIGNUP_SUCCESS_MESSAGE, USER_PROFILE_INFORMATION_MESSAGE
-from constants import HOME_PAGE_MESSAGE, CHANGE_PASSWORD_SUCCESS_MESSAGE, DELETE_USER_SUCCESS_MESSAGE, LOGOUT_SUCCESS_MESSAGE, VALIDATE_TOKEN_SUCCESS_MESSAGE
+from src.database_handler.schemas.user_schemas import User_Information
+from src.database_handler.schemas.url_schemas import URLS_Details, _Short_URL
+from src.constants import CREATE_URL_SUCCESS_MESSAGE, EDIT_URL_SUCCESS_MESSAGE
+from src.constants import  DELETE_URL_SUCCESS_MESSAGE, LOGIN_SUCCESS_MESSAGE, SIGNUP_SUCCESS_MESSAGE, USER_PROFILE_INFORMATION_MESSAGE
+from src.constants import HOME_PAGE_MESSAGE, CHANGE_PASSWORD_SUCCESS_MESSAGE, DELETE_USER_SUCCESS_MESSAGE, LOGOUT_SUCCESS_MESSAGE, VALIDATE_TOKEN_SUCCESS_MESSAGE
 
 class _Access_Token(BaseModel):
     access_token : str = Field(default = None, title = "Token of the user", description = "The token of the user should be a string")
@@ -47,7 +47,7 @@ class Long_URL_Delete_Response(URLS_Details, _Message_Response):
     message : str = Field(default = DELETE_URL_SUCCESS_MESSAGE)
 
 class User_Validate_Token_Response(_Message_Response):
-    message : str = Field(default = VALIDATE_TOKEN_SUCCESS_MESSAGE)
+    pass
     
 class Homepage_Response(_Message_Response):
     message : str = Field(default = HOME_PAGE_MESSAGE)

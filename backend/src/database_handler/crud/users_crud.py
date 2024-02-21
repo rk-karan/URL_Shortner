@@ -1,12 +1,12 @@
 """This module contains the CRUD operations for the users.
 """
-from auth import auth_handler
+from src.auth.auth_handler import auth_handler
 from sqlalchemy.orm import Session
-from base62conversions import decimal_to_base62
-from database_handler.models import USERS, URLS_Mapping
-from database_handler.schemas import get_payload_decoded
-from constants import NULL_ENTRY_IN_URLS_MAPPING, USER_EMAIL_KEY
-from exceptions.exceptions import User_Already_Exists, Invalid_User, Missing_Params
+from src.base62conversions import decimal_to_base62
+from src.database_handler.models import USERS, URLS_Mapping
+from src.routes.response_handler import get_payload_decoded
+from src.constants import NULL_ENTRY_IN_URLS_MAPPING, USER_EMAIL_KEY
+from src.exceptions import User_Already_Exists, Invalid_User, Missing_Params
     
 def check_user(db: Session, email: str):
     """Checks the presence of a user in the db using user email.

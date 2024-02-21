@@ -1,23 +1,23 @@
 import os
 import socket
-import uvicorn
 from typing import Union
-from logger import logger
+from src.logger import logger
 from dotenv import load_dotenv
-from utils import send_response
+from src.utils import send_response
 from sqlalchemy.orm import Session
-from database_handler.models import Base
+from src.database_handler.models import Base
 from fastapi.responses import RedirectResponse
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.gzip import GZipMiddleware
-from routes.url_routes import routes as url_routes
-from routes.user_routes import routes as user_routes
-from database_handler.db_connector import db_connector
+from src.routes.url_routes import router as url_routes
+from src.routes.user_routes import router as user_routes
+from src.database_handler.db_connector import db_connector
 from fastapi import FastAPI, Depends, status, BackgroundTasks
-from exceptions.exceptions import Invalid_Redirection_Request
-from middleware import Information_Middleware, RateLimitingMiddleware
-from database_handler.crud import get_original_url, increment_hit_count
-from database_handler.schemas import get_homepage_response, Homepage_Response
+from src.exceptions import Invalid_Redirection_Request
+from src.middleware import Information_Middleware, RateLimitingMiddleware
+from src.database_handler.crud.url_crud import get_original_url, increment_hit_count
+from src.database_handler.schemas.response_schemas import Homepage_Response
+from src.routes.response_handler import get_homepage_response
 
 app = FastAPI()
 logger.log("FastAPI app initialized")
@@ -68,8 +68,5 @@ def redirect_short_url(background_tasks: BackgroundTasks, short_url: str , db: S
     except Exception as e:
         return send_response(content={e}, status_code=status.HTTP_400_BAD_REQUEST, error_tag=True)
 
-app.include_router(user_routes.router)
-app.include_router(url_routes.router)
-
-if __name__ == "__main__":
-    uvicorn.run("application:app", host="127.0.0.1", port=8000 , reload = True) 
+app.include_router(user_routes)
+app.include_router(url_routes)

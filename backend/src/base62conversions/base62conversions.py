@@ -1,6 +1,6 @@
 import os
 from dotenv import load_dotenv
-from exceptions.exceptions import INVALID_BASE62_STRING
+from src.exceptions import Invalid_Base62_String
 
 # Load Environment Variables
 env_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'config', '.env')
@@ -20,9 +20,9 @@ def decimal_to_base62(decimal_num: int):
     """
     try:
         if not decimal_num:
-            raise INVALID_BASE62_STRING
+            raise Invalid_Base62_String
         if decimal_num > MAX_LIMIT:
-            raise INVALID_BASE62_STRING
+            raise Invalid_Base62_String
         base62_string = ""
         decimal_num = MAX_LIMIT - decimal_num
 
@@ -46,7 +46,7 @@ def base62_to_decimal(base62_string: str):
     """
     try:
         if not base62_string:
-            raise INVALID_BASE62_STRING
+            raise Invalid_Base62_String
         base62_dict = {char: index for index, char in enumerate(CHARACTERS)}
         decimal_num = 0
         base = 62
@@ -55,7 +55,7 @@ def base62_to_decimal(base62_string: str):
             decimal_num = decimal_num * base + base62_dict[char]
         
         if decimal_num > MAX_LIMIT:
-            raise INVALID_BASE62_STRING
+            raise Invalid_Base62_String
         
         return MAX_LIMIT - decimal_num
     except Exception as e:

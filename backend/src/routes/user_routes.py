@@ -1,19 +1,19 @@
 from typing import Union
-from logger import logger
-from auth import auth_handler
-from utils import send_response
+from src.logger import logger
+from src.auth.auth_handler import auth_handler
+from src.utils import send_response
 from sqlalchemy.orm import Session
 from fastapi.security import OAuth2PasswordRequestForm
-from database_handler.db_connector import db_connector
-from exceptions.exceptions import Invalid_User, User_Already_Exists
+from src.database_handler.db_connector import db_connector
+from src.exceptions import Invalid_User, User_Already_Exists
 from fastapi import APIRouter, Depends, Body, Response, status, BackgroundTasks
-from database_handler.schemas import User_Profile_Response, User_Validate_Token_Response
-from constants import ACCESS_TOKEN_KEY, AUTHORIZATION_SCHEME, USER_EMAIL_KEY, USER_NAME_KEY
-from database_handler.schemas import get_user_create_response, get_login_response, get_user_profile_response
-from database_handler.schemas import User_Delete_Response, User_Password_Update_Request, User_Password_Update_Response
-from database_handler.crud.users_crud.crud import add_user, login_user, get_user_profile_content, delete_user_by_email, change_user_password
-from database_handler.schemas import User_Create_Request, User_Create_Response, User_Logout_Response, User_Login_Request, User_Login_Response
-from database_handler.schemas import get_user_password_update_response, get_user_validate_token_response, get_user_delete_response, get_user_logout_response
+from src.database_handler.schemas.response_schemas import User_Profile_Response, User_Validate_Token_Response
+from src.constants import ACCESS_TOKEN_KEY, AUTHORIZATION_SCHEME, USER_EMAIL_KEY, USER_NAME_KEY
+from src.routes.response_handler import get_user_create_response, get_login_response, get_user_profile_response
+from src.database_handler.schemas.response_schemas import User_Delete_Response, User_Password_Update_Response, User_Create_Response, User_Logout_Response, User_Login_Response
+from src.database_handler.crud.users_crud import add_user, login_user, get_user_profile_content, delete_user_by_email, change_user_password
+from src.database_handler.schemas.user_schemas import User_Create_Request, User_Login_Request, User_Password_Update_Request
+from src.routes.response_handler import get_user_password_update_response, get_user_validate_token_response, get_user_delete_response, get_user_logout_response
 
 router = APIRouter(
     prefix="/user",

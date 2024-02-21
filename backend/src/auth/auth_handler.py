@@ -7,10 +7,10 @@ from dotenv import load_dotenv
 from datetime import datetime, timedelta
 from passlib.context import CryptContext
 
-from logger import logger
-from exceptions.exceptions import Invalid_User, Missing_Params
-from constants import PAYLOAD_USER_KEY, PAYLOAD_EXPIRY_KEY, DATE_TIME_FORMAT
-from ..OAuth2.OAuth2PasswordBearerWithCookie import OAuth2PasswordBearerWithCookie
+from src.logger import logger
+from src.exceptions import Invalid_User, Missing_Params
+from src.constants import PAYLOAD_USER_KEY, PAYLOAD_EXPIRY_KEY, DATE_TIME_FORMAT
+from src.auth.OAuth2PasswordBearerWithCookie import OAuth2PasswordBearerWithCookie
 
 # Load Environment Variables
 env_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), 'config', '.env')

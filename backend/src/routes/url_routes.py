@@ -1,16 +1,18 @@
 from typing import Union
-from logger import logger
-from auth import auth_handler
-from utils import send_response
+from src.logger import logger
+from src.auth.auth_handler import auth_handler
+from src.utils import send_response
 from sqlalchemy.orm import Session
-from constants import USER_EMAIL_KEY
-from exceptions.exceptions import Invalid_User
-from database_handler.db_connector import db_connector
+from src.constants import USER_EMAIL_KEY
+from src.exceptions import Invalid_User
+from src.database_handler.db_connector import db_connector
 from fastapi import APIRouter, Depends, Body, status, BackgroundTasks
-from database_handler.crud import create_short_url, delete_url, edit_long_url, get_user_profile_content
-from database_handler.schemas import Long_URL_Edit_Request, Long_URL_Edit_Response, Long_URL_Delete_Request
-from database_handler.schemas import Long_URL_Create_Request, Long_URL_Create_Response, Long_URL_Delete_Response
-from database_handler.schemas import get_long_url_create_response, get_long_url_edit_response, get_long_url_delete_response
+from src.database_handler.crud.url_crud import create_short_url, delete_url, edit_long_url
+from src.database_handler.crud.users_crud import get_user_profile_content
+from src.database_handler.schemas.url_schemas import Long_URL_Edit_Request, Long_URL_Delete_Request
+from src.database_handler.schemas.url_schemas import Long_URL_Create_Request
+from src.database_handler.schemas.response_schemas import Long_URL_Edit_Response, Long_URL_Delete_Response, Long_URL_Create_Response
+from src.routes.response_handler import get_long_url_create_response, get_long_url_edit_response, get_long_url_delete_response
 
 router = APIRouter(
     prefix="/url",

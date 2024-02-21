@@ -1,14 +1,14 @@
 """This module handles the CRUD operations for the URLS_Mapping table.
 """
 import os
-from logger import logger
+from src.logger import logger
 from datetime import datetime
 from dotenv import load_dotenv
 from sqlalchemy.orm import Session
-from database_handler.models import URLS_Mapping
-from base62conversions.base62conversions import decimal_to_base62 , base62_to_decimal
-from exceptions.exceptions import Not_Found, Missing_Params, URL_Create_Limit_Reached, URL_Create_URL_Already_Exists
-from constants import DOMAIN_NAME, NULL_ENTRY_IN_URLS_MAPPING, USER_EMAIL_KEY, LONG_URL_KEY, NULL_INTEGER, URL_HIT_COUNT_KEY
+from src.database_handler.models import URLS_Mapping
+from src.base62conversions import decimal_to_base62 , base62_to_decimal
+from src.exceptions import Not_Found, Missing_Params, URL_Create_Limit_Reached, URL_Create_URL_Already_Exists
+from src.constants import DOMAIN_NAME, NULL_ENTRY_IN_URLS_MAPPING, USER_EMAIL_KEY, LONG_URL_KEY, NULL_INTEGER, URL_HIT_COUNT_KEY
 
 # Load Environment Variables
 env_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(__file__)))), 'config', '.env')

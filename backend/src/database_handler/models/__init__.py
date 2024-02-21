@@ -1,1 +1,1 @@
-from .models import *
+from .models import Base, USERS, URLS_Mapping

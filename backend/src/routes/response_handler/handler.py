@@ -1,17 +1,17 @@
 import json
 from fastapi.encoders import jsonable_encoder
-from ..user_schemas.schema import User_Details
-from exceptions.exceptions import Missing_Params
-from ..response_schemas.schema import User_Password_Update_Response, Homepage_Response
-from constants import JSON_RESPONSE_INDENT, JSON_RESPONSE_SORT_KEYS, JSON_RESPONSE_DEFAULT
-from ..response_schemas.schema import User_Login_Response, User_Create_Response, Payload_Decoded, User_Logout_Response, Long_URL_Delete_Response
-from ..response_schemas.schema import User_Profile_Response, Long_URL_Create_Response, Long_URL_Edit_Response, User_Validate_Token_Response, User_Delete_Response
+from src.database_handler.schemas.user_schemas import User_Details
+from src.exceptions import Missing_Params
+from src.database_handler.schemas.response_schemas import User_Password_Update_Response, Homepage_Response
+from src.constants import JSON_RESPONSE_INDENT, JSON_RESPONSE_SORT_KEYS, JSON_RESPONSE_DEFAULT
+from src.database_handler.schemas.response_schemas import User_Login_Response, User_Create_Response, Payload_Decoded, User_Logout_Response, Long_URL_Delete_Response
+from src.database_handler.schemas.response_schemas import User_Profile_Response, Long_URL_Create_Response, Long_URL_Edit_Response, User_Validate_Token_Response, User_Delete_Response
 
 def make_response(item = None):
     if not item:
         raise Missing_Params
-    # return json.dumps(jsonable_encoder(item), sort_keys=JSON_RESPONSE_SORT_KEYS, indent=JSON_RESPONSE_INDENT, default=JSON_RESPONSE_DEFAULT)
-    return item.dict()
+    return json.dumps(jsonable_encoder(item), sort_keys=JSON_RESPONSE_SORT_KEYS, indent=JSON_RESPONSE_INDENT, default=JSON_RESPONSE_DEFAULT)
+    # return item.dict()
 
 def get_user_details(name: str = None, email: str = None):
     if not name or not email:

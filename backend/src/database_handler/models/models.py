@@ -1,7 +1,7 @@
 """ This module contains the models for the database.
 """
-from ..db_connector import db_connector
-from sqlalchemy import Column, Integer, String, DateTime, func, UniqueConstraint
+from src.database_handler.db_connector import db_connector
+from sqlalchemy import Column, Integer, String, DateTime, func
 
 Base = db_connector._Base
 

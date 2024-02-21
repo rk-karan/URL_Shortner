@@ -1,5 +1,5 @@
 import os
-from database_handler.db_connector import DB_Connector
+from database_handler.db_connector.db_connector import DB_Connector
 from dotenv import load_dotenv
 
 env_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), ".env")
