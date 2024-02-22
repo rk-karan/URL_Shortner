@@ -1,4 +1,4 @@
-import {useState} from 'react';
+import {useState , useContext} from 'react';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import Typography from '@mui/material/Typography';
@@ -6,6 +6,7 @@ import Modal from '@mui/material/Modal';
 import { deleteURL, getUser } from '../utils/api';
 import { useDispatch } from 'react-redux';
 import { addUser } from '../redux/userSlice';
+import SnackBarContext from '../utils/snackBarContext';
 
 const style = {
   position: 'absolute',
@@ -24,6 +25,9 @@ const DeleteModal = ({url})=> {
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
   const dispatch = useDispatch();
+  const {setShowSnackbar , setMessage, setSeverity } = useContext(SnackBarContext);
+
+
   const handleYes = async(e) => {
     e.preventDefault(e);
     try{
@@ -33,10 +37,17 @@ const DeleteModal = ({url})=> {
         if(userReq.status === 200){
           dispatch(addUser(userReq.data));
           handleClose();
+          console.log("deleted url")
+          setMessage("Deleted URL successfully!");
+          setSeverity("success");
+          setShowSnackbar(true);
         }
       }
     }catch(err){
-      console.log(err);
+        setMessage("Some error occurred!");
+        setSeverity("error");
+        setShowSnackbar(true);
+        console.log(err);
     }
   }
   const handleNo = (e) => {

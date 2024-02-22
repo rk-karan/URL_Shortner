@@ -1,19 +1,38 @@
-import React, { useEffect } from 'react';
-import AppBar from '@mui/material/AppBar';
-import Box from '@mui/material/Box';
-import Toolbar from '@mui/material/Toolbar';
-import Typography from '@mui/material/Typography';
-import Button from '@mui/material/Button';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
-import { getUser, logoutUser } from '../utils/api';
-import { addUser, removeUser } from  "../redux/userSlice";
+
+import AppBar from '@mui/material/AppBar';
+import Box from '@mui/material/Box';
+import Menu from '@mui/material/Menu';
+
+import MenuItems from './MenuItems';
+import ToolBarContent from './ToolBarContent';
+import DeleteUserModal from './DeleteUserModal';
+
+import { getUser } from '../utils/api';
+import { addUser } from  "../redux/userSlice";
+
 import "./Header.css";
+import {paperProps} from "./menuStyle";
 
 const Header = () => {
     const navigate = useNavigate();
     const user = useSelector((store) => store.user);
     const dispatch = useDispatch();
+    const [anchorEl, setAnchorEl] = useState(null);
+    const open = Boolean(anchorEl);
+    const [showModal , setShowModal] = useState(false);
+    const handleModalOpen = () => setShowModal(true);
+    const handleModalClose = () => setShowModal(false);
+
+    const handleClick = (event) => {
+        setAnchorEl(event.currentTarget);
+    };
+    const handleClose = () => {
+        setAnchorEl(null);
+    };
+
 
     useEffect(() => {
         const fetchUser = async () => {
@@ -21,7 +40,7 @@ const Header = () => {
                 const res = await getUser();
                 if (res.status === 200 && !user) {
                     dispatch(addUser(res.data));
-                    navigate('/');
+                    // navigate('/');
                 }
             } catch (err) {
                 console.error("Error checking user status:", err);
@@ -31,39 +50,29 @@ const Header = () => {
         fetchUser();
     }, [user, dispatch, navigate]);
 
-    const handleLogout = async () => {
-        try {
-            await logoutUser();
-            dispatch(removeUser());
-            navigate('/login');
-        } catch (err) {
-            console.error("Error logging out:", err);
-        }
-    };
-
-    const handleSignIn = () => {
-        navigate('/login');
-    };
-
-    const handleLogoClick = () => {
-        navigate('/');
-    };
-
     return (
+    <>
         <Box sx={{ flexGrow: 1 }}>
             <AppBar position="static">
-                <Toolbar>
-                    <Typography variant="h6" component="div" sx={{ flexGrow: 1 }} onClick={handleLogoClick} className="header-title">
-                        URL SHORTENER
-                    </Typography>
-                    {
-                        !user ?
-                        <Button color="inherit" onClick={handleSignIn}>Sign in</Button> :
-                        <Button color="inherit" onClick={handleLogout}>Logout</Button>
-                    }
-                </Toolbar>
+                <ToolBarContent handleClick={handleClick} open = {open} /> {/*   If user, then Profile Actions else Login*/}
             </AppBar>
         </Box>
+        <Menu
+            anchorEl={anchorEl}
+            id="account-menu"
+            open={open}
+            onClose = {handleClose}
+            onClick = {handleClose}
+            PaperProps = { paperProps }
+            transformOrigin={{ horizontal: 'right', vertical: 'top' }}
+            anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
+        >
+            <MenuItems handleModalOpen = {handleModalOpen}/>  {/*   If user, then Settings */}
+
+        </Menu>
+        <DeleteUserModal showModal = {showModal} handleModalClose={handleModalClose}/>
+    </>
+
     );
 };
 

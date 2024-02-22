@@ -1,6 +1,7 @@
 import axios from "axios";
 
 export const baseURL = "http://localhost:8000/"
+export const clientURL = "http://localhost:3000/"
 
 const API = axios.create({
     baseURL: baseURL,
@@ -28,11 +29,6 @@ export const createShortUrl = (data)  =>{
     return API.post('/url/create_url', {...data})
 }
 
-export const redirectURL = (data) => {
-    console.log(`${baseURL}${data}`);
-    return API.get(`${baseURL}${data}`);
-}
-
 export const updateURL = (data) => {
     console.log(data);
     return API.put('/url/edit_url' , {...data});
@@ -41,4 +37,12 @@ export const updateURL = (data) => {
 export const deleteURL = (data) => {
     console.log(data);
     return API.put('/url/delete_url' , {...data});
+}
+
+export const changeCurrentPassword = (data) => {
+    return API.put('/user/change_password' , {...data});
+}
+
+export const deleteUser = () => {
+    return API.delete('/user/delete_user');
 }

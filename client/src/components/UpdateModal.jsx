@@ -1,4 +1,4 @@
-import {useState, useRef} from 'react';
+import {useState, useRef, useContext} from 'react';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import FormControl from '@mui/material/FormControl';
@@ -9,7 +9,8 @@ import {checkValidUrl} from "../utils/validate";
 import { updateURL, getUser } from '../utils/api';
 import {useDispatch } from 'react-redux';
 import { addUser } from '../redux/userSlice';
-import Typography from '@mui/material/Typography';
+import SnackBarContext from '../utils/snackBarContext';
+
 
 const style = {
   position: 'absolute',
@@ -26,27 +27,27 @@ const style = {
 
 export const UpdateModal = ({url}) => {
     const [open, setOpen] = useState(false);
-    const [errMessage , setErrMessage] = useState("");
     const dispatch = useDispatch();
     const handleOpen = () => setOpen(true);
+    const {setShowSnackbar , setMessage, setSeverity } = useContext(SnackBarContext);
     const handleClose = () => {
-        setErrMessage("");
         setOpen(false);
     }
-
     const newURLRef = useRef(null);
 
     const handleUpdateUrl = async(e) =>{
         e.preventDefault();
         const err = checkValidUrl(newURLRef.current.value);
         if(err){
-            console.log(err);
-            setErrMessage(err);
+            setMessage(err);
+            setSeverity("error");
+            setShowSnackbar(true);
             return;
         }
         if(newURLRef.current.value === url.long_url){
-            console.log("Same url");
-            setErrMessage("Same URL, Change to update")
+            setMessage("Same URL!! \n Please change to update");
+            setSeverity("error");
+            setShowSnackbar(true);
             return;
         }else{
             try{
@@ -55,13 +56,18 @@ export const UpdateModal = ({url}) => {
                 if(res.status === 200){
                     const userReq = await getUser();
                     if(userReq.status === 200){
-                        setErrMessage("");
                         dispatch(addUser(userReq.data));
                         handleClose();
+                        setMessage("URL updated successfully!");
+                        setSeverity("success");
+                        setShowSnackbar(true);
                     }
                 }
             }catch(err){
                 console.log(err);
+                setMessage("Some error occurred!");
+                setSeverity("error");
+                setShowSnackbar(true);
             }
         }
 
@@ -77,8 +83,6 @@ export const UpdateModal = ({url}) => {
         aria-describedby="modal-modal-description"
         >
         <Box sx={style}>
-        <Typography variant="p" component="p" color = "error" sx = {{marginLeft: '35%'}}>{errMessage}</Typography>
-        <br/>
         <FormControl fullWidth sx={{ m: 1}}>
           <InputLabel htmlFor="outlined-adornment-amount">New URL</InputLabel>
           <OutlinedInput

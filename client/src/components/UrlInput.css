@@ -4,6 +4,10 @@
     flex-wrap: wrap;
     flex-direction: column;
 }
+.form-data{
+    margin-left: 20%;
+    margin-top: 2.5%;
+}
 .div-info-para{
     margin-left: 35%;
     font-size: xx-large;

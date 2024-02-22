@@ -2,7 +2,7 @@ import React from 'react';
 import {useSelector } from 'react-redux';
 import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper } from '@mui/material';
 import './DisplayTable.css';
-import {baseURL} from "../utils/api";
+import {clientURL} from "../utils/api";
 import UpdateModal from './UpdateModal';
 import DeleteModal from './DeleteModal';
 
@@ -13,7 +13,7 @@ const DisplayUrlMapping = () => {
     }
     const handleClickShortUrl = async(e, short_url) => {
         e.preventDefault();
-        window.location.href = `${baseURL}${short_url}`
+        window.location.href = `${clientURL}${short_url}`
     }
   return (
     <div>
@@ -42,7 +42,7 @@ const DisplayUrlMapping = () => {
                     }}
                     align="center"
                     onClick={(e)=> handleClickShortUrl(e, url.short_url)}
-                    >{`${baseURL}${url.short_url}`}</TableCell>
+                    >{`${clientURL}${url.short_url}`}</TableCell>
                     <TableCell align="center"><span className='update-btn'><UpdateModal url = {url}/></span><span className='delete-button'><DeleteModal url = {url}/></span></TableCell>
                     </TableRow>
                 ))}
