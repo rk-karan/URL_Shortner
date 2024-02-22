@@ -72,8 +72,10 @@ def create_short_url(db: Session , long_url: str, email: str):
         existing_url = db.query(URLS_Mapping).filter_by(email=NULL_ENTRY_IN_URLS_MAPPING.get(USER_EMAIL_KEY), long_url=NULL_ENTRY_IN_URLS_MAPPING.get(LONG_URL_KEY)).first()
         short_url = None
         entry_id =  None
+        id = None
         
         if existing_url:
+            id = existing_url.id
             existing_url.email = email
             existing_url.long_url = long_url
             existing_url.created_on = datetime.utcnow()
@@ -87,10 +89,11 @@ def create_short_url(db: Session , long_url: str, email: str):
             db.add(url_obj)
             db.commit()
             db.refresh(url_obj)
+            id = url_obj.id
             entry_id = decimal_to_base62(url_obj.id)
         
         short_url = get_short_url(entry_id=entry_id)
-        return short_url
+        return (short_url, id)
 
     except Exception as e:
         raise e

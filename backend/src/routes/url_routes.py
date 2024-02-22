@@ -36,13 +36,13 @@ async def add_url(background_tasks: BackgroundTasks, long_url_create_request: Lo
         background_tasks.add_task(logger.log, message=f"User: {user.get(USER_EMAIL_KEY)}")
         # logger.log(f"User: {user.get(USER_EMAIL_KEY)}", error_tag=False)
          
-        short_url = create_short_url(db, long_url = long_url_create_request.long_url, email = user.get(USER_EMAIL_KEY))
+        short_url, entry_id = create_short_url(db, long_url = long_url_create_request.long_url, email = user.get(USER_EMAIL_KEY))
         background_tasks.add_task(logger.log, message=f"SUCCESSFUL: Short URL: {short_url}, created")
         # logger.log(f"SUCCESSFUL: Short URL: {short_url}, created", error_tag=False)
         
         content = get_user_profile_content(db, user)
 
-        return get_long_url_create_response(short_url=short_url, long_url=long_url_create_request.long_url, urls=content)
+        return get_long_url_create_response(id=int(entry_id), short_url=short_url, long_url=long_url_create_request.long_url, urls=content)
     except Invalid_User as e:
         return send_response(content=e, status_code=status.HTTP_401_UNAUTHORIZED, error_tag=True)
     except Exception as e:

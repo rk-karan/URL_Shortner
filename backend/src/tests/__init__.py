@@ -1,2 +1,0 @@
-from .database_connector import database_connector
-import test_application

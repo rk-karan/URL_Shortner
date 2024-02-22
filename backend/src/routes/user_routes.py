@@ -150,7 +150,7 @@ async def delete_user(background_tasks: BackgroundTasks, response: Response, db:
     except Exception as e:
         return send_response(content=e, status_code=status.HTTP_400_BAD_REQUEST, error_tag=True)
 
-@router.post("/logout", status_code=status.HTTP_200_OK, summary="Logout the current user", response_description="Success message")
+@router.get("/logout", status_code=status.HTTP_200_OK, summary="Logout the current user", response_description="Success message")
 async def logout(background_tasks: BackgroundTasks, response: Response, token: str = Depends(auth_handler._O2AUTH2_SCHEME)) -> Union[User_Logout_Response, str]:
     """This api endpoint logs out an existing user. The user must be logged in.
 

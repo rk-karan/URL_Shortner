@@ -1,6 +1,6 @@
 from pydantic import BaseModel, Field
 from src.database_handler.schemas.user_schemas import User_Information
-from src.database_handler.schemas.url_schemas import URLS_Details, _Short_URL
+from src.database_handler.schemas.url_schemas import URLS_Details, _Short_URL, _id
 from src.constants import CREATE_URL_SUCCESS_MESSAGE, EDIT_URL_SUCCESS_MESSAGE
 from src.constants import  DELETE_URL_SUCCESS_MESSAGE, LOGIN_SUCCESS_MESSAGE, SIGNUP_SUCCESS_MESSAGE, USER_PROFILE_INFORMATION_MESSAGE
 from src.constants import HOME_PAGE_MESSAGE, CHANGE_PASSWORD_SUCCESS_MESSAGE, DELETE_USER_SUCCESS_MESSAGE, LOGOUT_SUCCESS_MESSAGE, VALIDATE_TOKEN_SUCCESS_MESSAGE
@@ -37,7 +37,7 @@ class User_Delete_Response(_Message_Response):
 class User_Logout_Response(_Message_Response):
     message : str = Field(default = LOGOUT_SUCCESS_MESSAGE)
 
-class Long_URL_Create_Response(_Short_URL, URLS_Details, _Message_Response):
+class Long_URL_Create_Response(_id, _Short_URL, URLS_Details, _Message_Response):
     message : str = Field(default = CREATE_URL_SUCCESS_MESSAGE)
 
 class Long_URL_Edit_Response(URLS_Details, _Message_Response):

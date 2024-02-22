@@ -84,6 +84,9 @@ PAYLOAD_USER_KEY = "user"
 # Key to access long url in request
 LONG_URL_KEY = "long_url"
 
+SHORT_URL_KEY = "short_url"
+
+ID_KEY = "id"
 # Key to access hit_count
 URL_HIT_COUNT_KEY = "hit_count"
 

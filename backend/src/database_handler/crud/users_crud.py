@@ -101,7 +101,7 @@ def get_user_profile_content(db: Session, user: dict):
     except Exception as e:
         raise e
 
-def change_user_password(db: Session, email: str, new_password: str, old_password: str):
+def change_user_password(db: Session, email: str= None, new_password: str=None, old_password: str=None):
     """Changes the password of the user with given email.
 
     Args:

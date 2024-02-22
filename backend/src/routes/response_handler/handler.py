@@ -48,10 +48,10 @@ def get_user_delete_response():
 def get_user_logout_response():
     return make_response(User_Logout_Response())
 
-def get_long_url_create_response(short_url: str = None, long_url: str = None, urls=[]):
-    if not short_url or not long_url:
+def get_long_url_create_response(id:int = None, short_url: str = None, long_url: str = None, urls=[]):
+    if not short_url or not long_url or not id:
         raise Missing_Params
-    return make_response(Long_URL_Create_Response(short_url= short_url, long_url= long_url, urls=urls))
+    return make_response(Long_URL_Create_Response(id=id, short_url= short_url, long_url= long_url, urls=urls))
 
 def get_long_url_edit_response(urls = []):
     return make_response(Long_URL_Edit_Response(urls=urls))

@@ -66,7 +66,7 @@ def redirect_short_url(background_tasks: BackgroundTasks, short_url: str , db: S
         background_tasks.add_task(increment_hit_count, db=db, entry_id=_id)
         return RedirectResponse(url = original_url)
     except Exception as e:
-        return send_response(content={e}, status_code=status.HTTP_400_BAD_REQUEST, error_tag=True)
+        return send_response(content={e}, status_code=status.HTTP_404_NOT_FOUND, error_tag=True)
 
 app.include_router(user_routes)
 app.include_router(url_routes)

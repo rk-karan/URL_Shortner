@@ -40,7 +40,7 @@ class DB_Connector:
             self.initialize_database()
             
         except Exception as e:
-            self.logger.log(f"Error in DBConnector: {e}", error_tag=True)
+            self._logger.log(f"Error in DBConnector: {e}", error_tag=True)
             raise e
     
     def initialize_database(self):
@@ -54,7 +54,7 @@ class DB_Connector:
             self._Metadata.bind = self._engine
             self._Base = declarative_base()
         except Exception as e:
-            self.logger.log(f"Error in initialize_database: {e}", error_tag=True)
+            self._logger.log(f"Error in initialize_database: {e}", error_tag=True)
             raise e
 
     def get_db(self):
