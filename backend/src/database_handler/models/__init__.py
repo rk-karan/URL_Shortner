@@ -1,2 +1,1 @@
-from .url_models.models import *
-from .user_models.models import *
+from .models import Base, USERS, URLS_Mapping

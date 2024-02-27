@@ -1,54 +1,72 @@
-import uvicorn
+import os
 import socket
-from fastapi import FastAPI, Depends, HTTPException
-from fastapi.responses import JSONResponse
+from typing import Union
+from src.logger import logger
+from dotenv import load_dotenv
+from src.utils import send_response
 from sqlalchemy.orm import Session
-from typing import Annotated
-import json
-
-from logger import logger
-import database_handler.models.user_models.models as user_models
-import database_handler.models.url_models.models as url_models
-from database_handler.db_connector import db_connector
-
-from utils.send_response import send_response
-
-from decorators import log_info
-
-from routes.user_routes import routes as user_routes
+from src.database_handler.models import Base
+from fastapi.responses import RedirectResponse
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.middleware.gzip import GZipMiddleware
+from src.routes.url_routes import router as url_routes
+from src.routes.user_routes import router as user_routes
+from src.database_handler.db_connector import db_connector
+from fastapi import FastAPI, Depends, status, BackgroundTasks
+from src.exceptions import Invalid_Redirection_Request
+from src.middleware import Information_Middleware, RateLimitingMiddleware
+from src.database_handler.crud.url_crud import get_original_url, increment_hit_count
+from src.database_handler.schemas.response_schemas import Homepage_Response
+from src.routes.response_handler import get_homepage_response
 
 app = FastAPI()
 logger.log("FastAPI app initialized")
 
+# Load Environment Variables
+env_path = os.path.join(os.path.dirname(__file__), 'config', '.env')
+load_dotenv(dotenv_path=env_path)
+
+ORIGINS = os.getenv("ORIGINS")
+MAX_AGE_CORS_CACHE = int(os.getenv("MAX_AGE_CORS_CACHE"))
+GZIP_MINIMUM_SIZE = int(os.getenv("GZIP_MINIMUM_SIZE"))
+
+# app.add_middleware(RateLimitingMiddleware)
+app.add_middleware(Information_Middleware)
+app.add_middleware(CORSMiddleware, allow_origins=ORIGINS, allow_credentials=True, allow_methods=["*"], allow_headers=["*"], max_age=MAX_AGE_CORS_CACHE)
+app.add_middleware(GZipMiddleware, minimum_size=GZIP_MINIMUM_SIZE)
+
 try:
-    user_models.Base.metadata.create_all(bind=db_connector.engine)
-    url_models.Base.metadata.create_all(bind=db_connector.engine)
+    Base.metadata.create_all(bind=db_connector._engine)
     logger.log("Database tables initialized")
 except Exception as e:
     logger.log(f"Error initializing database tables: {e}", error_tag=True)
 
+# Routes
+@app.get("/", tags=["test"], status_code=status.HTTP_200_OK, summary="Home Page", response_description="Welcome message")
+def home(background_tasks: BackgroundTasks) -> Union[Homepage_Response, str]:
+    """This function is used to return the welcome message.
 
-@app.get("/", tags=["test"])
-@log_info
-def home():
-    response = {
-        "message": "Welcome to the URL Shortener API!",
-        "hostname": socket.gethostname()
-    }
-    return send_response(content=response, status_code=200)
+    Returns:
+        Union[dict, str]: message, hostname
+    """
+    background_tasks.add_task(logger.log, message=f"Home Page Accessed by {socket.gethostname()}")
+    # logger.log(f"Home Page Accessed by {socket.gethostname()}")
+    return get_homepage_response(hostname= socket.gethostname())
 
-app.include_router(user_routes.router)
+@app.get("/{short_url}", tags=["redirection"], status_code=status.HTTP_301_MOVED_PERMANENTLY, summary="Redirects to the original URL", response_description="Redirect response to the original URL")
+def redirect_short_url(background_tasks: BackgroundTasks, short_url: str , db: Session = Depends(db_connector.get_db)):
+    try:
+        original_url, _id = get_original_url(db=db , short_url=short_url)
+        background_tasks.add_task(logger.log, message=f"Redirecting from {short_url} to {original_url}")
+        # logger.log(f"Redirecting from {short_url} to {original_url}")
+        
+        if not original_url:
+            raise Invalid_Redirection_Request
 
-# @app.post("/create_short_url", response_model = CREATE_URL)
-# # @log_info
-# def create_short_url(create_url_request: CREATE_URL_REQUEST, db: Session = Depends(db_connector.get_db) , endpoint = 'create_short_url'):
-#     try:
-#         url_obj = add_url(db , create_url_request)
-#         return send_response(content=url_obj, status_code=200)
-#     except Exception as e:
-#         logger.log(f"Error creating short url: {e}", error_tag=True)
-#         raise send_response(content={"error": e}, status_code=500, error_tag=True)
+        background_tasks.add_task(increment_hit_count, db=db, entry_id=_id)
+        return RedirectResponse(url = original_url)
+    except Exception as e:
+        return send_response(content={e}, status_code=status.HTTP_404_NOT_FOUND, error_tag=True)
 
-
-if __name__ == "__main__":
-    uvicorn.run("application:app", host="127.0.0.1", port=8000 , reload = True)
+app.include_router(user_routes)
+app.include_router(url_routes)

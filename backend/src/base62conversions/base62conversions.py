@@ -1,19 +1,28 @@
-from logger import logger
-from decorators import log_info
+import os
+from dotenv import load_dotenv
+from src.exceptions import Invalid_Base62_String
 
-CHARACTERS = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
-MAX_LIMIT = 70000
+# Load Environment Variables
+env_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'config', '.env')
+load_dotenv(dotenv_path=env_path)
 
-@log_info
+CHARACTERS = os.getenv("CHARACTERS")
+MAX_LIMIT = int(os.getenv("MAX_LIMIT"))
+
 def decimal_to_base62(decimal_num: int):
-    
+    """This function is used to convert decimal number to base62 integer.
+
+    Args:
+        decimal_num (int): Decimal Number
+
+    Returns:
+        str: Base62 Integer
+    """
     try:
         if not decimal_num:
-            raise Exception("Input is empty")
-        
+            raise Invalid_Base62_String
         if decimal_num > MAX_LIMIT:
-            raise Exception("Input is greater than the maximum limit")
-        
+            raise Invalid_Base62_String
         base62_string = ""
         decimal_num = MAX_LIMIT - decimal_num
 
@@ -24,24 +33,30 @@ def decimal_to_base62(decimal_num: int):
 
         return base62_string or "0"
     except Exception as e:
-        logger.log(f"Error converting decimal to base62: {e}", error_tag=True)
         raise e
 
-@log_info    
 def base62_to_decimal(base62_string: str):
-    
+    """This function is used to convert base62 integer to decimal number.
+
+    Args:
+        base62_string (str): Base62 Integer
+
+    Returns:
+        int: Decimal Number
+    """
     try:
         if not base62_string:
-            raise Exception("Input is empty")
-        
+            raise Invalid_Base62_String
         base62_dict = {char: index for index, char in enumerate(CHARACTERS)}
         decimal_num = 0
         base = 62
-
+        
         for char in base62_string:
             decimal_num = decimal_num * base + base62_dict[char]
         
-        return decimal_num
+        if decimal_num > MAX_LIMIT:
+            raise Invalid_Base62_String
+        
+        return MAX_LIMIT - decimal_num
     except Exception as e:
-        logger.log(f"Error converting base62 to decimal: {e}", error_tag=True)
         raise e

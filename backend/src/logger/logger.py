@@ -1,11 +1,13 @@
-import logging
-import sys
+""" This module is used to log the messages to the console and to the log file.
+"""
 import os
+import sys
 import locale
+import logging
 from colorama import Fore, Style
 
 LOG_LEVEL = logging.INFO
-LOG_FORMATTER = "%(asctime)s - %(levelname)s - %(message)s"
+LOG_FORMATTER = "%(asctime)s - %(levelname)s - %(filename)s - %(message)s"
 LOG_FILE_PATH = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "log.log")
 
 class _logger:
@@ -42,7 +44,7 @@ class _logger:
     def get_logger(self):
         return self.logger
     
-    def log(self, message, error_tag=False):
+    def log(self, message=None, error_tag=False):
         
         try:
             if not error_tag:
@@ -64,7 +66,7 @@ class _logger:
             print(message.encode('utf-8', errors='ignore'))
             pass
         except Exception as e:
-            print("Some Error Occurred.")
+            print(f"Some Error Occurred. {e}")
             pass
         
         sys.stdout.flush()
