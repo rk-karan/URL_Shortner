@@ -5,6 +5,7 @@ from src.logger import logger
 from dotenv import load_dotenv
 from src.utils import send_response
 from sqlalchemy.orm import Session
+from prometheus_client import make_asgi_app
 from src.database_handler.models import Base
 from fastapi.responses import RedirectResponse
 from fastapi.middleware.cors import CORSMiddleware
@@ -20,6 +21,7 @@ from src.database_handler.schemas.response_schemas import Homepage_Response
 from src.routes.response_handler import get_homepage_response
 
 app = FastAPI()
+metrics_app = make_asgi_app()
 logger.log("FastAPI app initialized")
 
 # Load Environment Variables
@@ -70,3 +72,4 @@ def redirect_short_url(background_tasks: BackgroundTasks, short_url: str , db: S
 
 app.include_router(user_routes)
 app.include_router(url_routes)
+app.mount("/monitor/metrics", metrics_app)
