@@ -1,13 +1,12 @@
 FROM python:3.9.6
 
-WORKDIR /src
+WORKDIR /backend
 
-COPY ./src/requirements.txt .
+COPY ./requirements.txt .
 
-RUN pip3 install -r requirements.txt
-# RUN pip3 install -r requirements.txt
+RUN python -m pip install --proxy http://proxy-wsa.esl.cisco.com:80 --upgrade pip
+RUN pip3 install --proxy http://proxy-wsa.esl.cisco.com:80 -r requirements.txt
 
-COPY ./src/. .
+COPY . .
 
-CMD ["gunicorn", "--workers", "2", "--bind", "0.0.0.0:5000", "--timeout", "2400", "uvicorn.workers.UvicornWorker", "application:app"]
-# CMD [ "python3", "application.py"]
+CMD ["python", "-m", "gunicorn", "main:app", "--workers", "2", "--bind", "0.0.0.0:8000", "--timeout", "2400", "-k" , "uvicorn.workers.UvicornWorker"]
