@@ -16,7 +16,9 @@ from src.routes.user_routes import router as user_routes
 from src.database_handler.db_connector import db_connector
 from fastapi import FastAPI, Depends, status, BackgroundTasks
 from src.exceptions import Invalid_Redirection_Request
+# from starlette_exporter import PrometheusMiddleware, handle_metrics
 from src.middleware import Information_Middleware, RateLimitingMiddleware
+
 from src.database_handler.crud.url_crud import get_original_url, increment_hit_count
 from src.database_handler.schemas.response_schemas import Homepage_Response
 from src.routes.response_handler import get_homepage_response

@@ -9,4 +9,4 @@ RUN pip3 install --proxy http://proxy-wsa.esl.cisco.com:80 -r requirements.txt
 
 COPY . .
 
-CMD ["python", "-m", "gunicorn", "main:app", "--workers", "2", "--bind", "0.0.0.0:8000", "--timeout", "2400", "-k" , "uvicorn.workers.UvicornWorker"]
+CMD ["python", "-m", "gunicorn", "main:app", "--workers", "2", "--bind", "0.0.0.0:5000", "--timeout", "2400", "-k" , "uvicorn.workers.UvicornWorker"]

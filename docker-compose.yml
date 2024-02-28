@@ -32,7 +32,7 @@ services:
     build:
       context: ./backend
     ports:
-    - "5000:8000"
+    - "5000:5000"
     volumes:
       - ./backend:/backend
     depends_on:
@@ -41,6 +41,17 @@ services:
     
     networks:
       - url_shortner_network
+  
+  nginx_server:
+    image: nginx:latest
+    networks:
+      - url_shortner_network
+    ports:
+      - "80:80"
+    volumes:
+      - ./web-server/config/nginx.conf:/etc/nginx/conf.d/default.conf
+    depends_on:
+      - url_shortner_backend
   
   url_shortner_prometheus:
     image: bitnami/prometheus:latest
@@ -64,7 +75,7 @@ services:
     env_file:
       - ./monitoring/grafana/config/.env
     volumes:
-      - ./monitoring/grafana/data-volumes/grafna:var/lib/grafana
+      - ./monitoring/grafana/data-volumes/grafana:/var/lib/grafana/data
     depends_on:
       - url_shortner_prometheus
     networks:
