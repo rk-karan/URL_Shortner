@@ -1,5 +1,7 @@
 global:
   scrape_interval: 15s # By default, scrape targets every 15 seconds.
+  evaluation_interval: 10s
+  scrape_timeout:      5s
 
   # Attach these labels to any time series or alerts when communicating with
   # external systems (federation, remote storage, Alertmanager).
@@ -10,10 +12,15 @@ global:
 # Here it's Prometheus itself.
 scrape_configs:
   # The job name is added as a label `job=<job_name>` to any timeseries scraped from this config.
-  - job_name: "nginx-server"
-
-    # Override the global default and scrape targets from this job every 5 seconds.
-    scrape_interval: 5s
+  - job_name: "backend-server"
 
     static_configs:
-      - targets: ["localhost:9090"]
+      - targets: ['url_shortner_backend:5000']
+  
+    metrics_path: /monitor/metrics/
+    scheme: http
+  
+  - job_name: "prometheus"
+
+    static_configs:
+      - targets: ['10.106.212.84:9000']

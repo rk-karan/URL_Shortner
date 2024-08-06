@@ -1,0 +1,86 @@
+version: "3.2"
+
+services:
+  database:
+    container_name: database
+    image: postgres:14-alpine
+    restart: always
+    env_file:
+      - ./database/.env
+    volumes:
+      - ./database/data-volumes/database:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    networks:
+      - url_shortner_network
+
+  database_admin:
+    container_name: database_admin
+    image: dpage/pgadmin4:latest
+    restart: always
+    env_file:
+      - ./database/.env
+    ports:
+      - "5050:80"
+    depends_on:
+      - database
+    networks:
+      - url_shortner_network
+  
+  url_shortner_backend:
+    container_name: url_shortner_backend 
+    build:
+      context: ./backend
+    ports:
+    - "5000:5000"
+    volumes:
+      - ./backend:/backend
+    depends_on:
+      - database
+      - database_admin
+    
+    networks:
+      - url_shortner_network
+  
+  nginx_server:
+    image: nginx:latest
+    networks:
+      - url_shortner_network
+    ports:
+      - "80:80"
+    volumes:
+      - ./web-server/config/nginx.conf:/etc/nginx/conf.d/default.conf
+    depends_on:
+      - url_shortner_backend
+  
+  url_shortner_prometheus:
+    image: bitnami/prometheus:latest
+    container_name: url_shortner_prometheus
+    restart: always
+    volumes:
+      - ./monitoring/prometheus/config/config.yml:/etc/prometheus/prometheus.yml
+    ports:
+      - "9000:9090"
+    networks:
+      - url_shortner_network
+    depends_on:
+      - url_shortner_backend
+  
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    restart: always
+    ports:
+      - "4000:3000"
+    env_file:
+      - ./monitoring/grafana/config/.env
+    volumes:
+      - ./monitoring/grafana/data-volumes/grafana:/var/lib/grafana/data
+    depends_on:
+      - url_shortner_prometheus
+    networks:
+      - url_shortner_network
+
+networks:
+  url_shortner_network:
+    driver: bridge

@@ -1,4 +1,5 @@
 import os
+import time
 import socket
 from typing import Union
 from src.logger import logger
@@ -15,7 +16,9 @@ from src.routes.user_routes import router as user_routes
 from src.database_handler.db_connector import db_connector
 from fastapi import FastAPI, Depends, status, BackgroundTasks
 from src.exceptions import Invalid_Redirection_Request
+# from starlette_exporter import PrometheusMiddleware, handle_metrics
 from src.middleware import Information_Middleware, RateLimitingMiddleware
+
 from src.database_handler.crud.url_crud import get_original_url, increment_hit_count
 from src.database_handler.schemas.response_schemas import Homepage_Response
 from src.routes.response_handler import get_homepage_response
@@ -30,18 +33,26 @@ load_dotenv(dotenv_path=env_path)
 
 ORIGINS = os.getenv("ORIGINS")
 MAX_AGE_CORS_CACHE = int(os.getenv("MAX_AGE_CORS_CACHE"))
-GZIP_MINIMUM_SIZE = int(os.getenv("GZIP_MINIMUM_SIZE"))
+RETRY_INTERVAL_SECONDS = int(os.getenv("RETRY_INTERVAL_SECONDS"))
+MAX_RETRY_ATTEMPTS = int(os.getenv("MAX_RETRY_ATTEMPTS"))
+# GZIP_MINIMUM_SIZE = int(os.getenv("GZIP_MINIMUM_SIZE"))
 
 # app.add_middleware(RateLimitingMiddleware)
 app.add_middleware(Information_Middleware)
 app.add_middleware(CORSMiddleware, allow_origins=ORIGINS, allow_credentials=True, allow_methods=["*"], allow_headers=["*"], max_age=MAX_AGE_CORS_CACHE)
-app.add_middleware(GZipMiddleware, minimum_size=GZIP_MINIMUM_SIZE)
+# app.add_middleware(GZipMiddleware, minimum_size=GZIP_MINIMUM_SIZE)
 
-try:
-    Base.metadata.create_all(bind=db_connector._engine)
-    logger.log("Database tables initialized")
-except Exception as e:
-    logger.log(f"Error initializing database tables: {e}", error_tag=True)
+for attempt in range(0, MAX_RETRY_ATTEMPTS):
+    try:
+        Base.metadata.create_all(bind=db_connector._engine)
+        logger.log("Database tables initialized")
+        break
+    except Exception as e:
+        logger.log(f"Error initializing database tables: {e}", error_tag=True)
+            
+        if attempt < MAX_RETRY_ATTEMPTS -1:
+            time.sleep(RETRY_INTERVAL_SECONDS)
+
 
 # Routes
 @app.get("/", tags=["test"], status_code=status.HTTP_200_OK, summary="Home Page", response_description="Welcome message")
